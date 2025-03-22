@@ -61,7 +61,7 @@ const Header = ({ toggleMobileSidebar }: ItemType) => {
   }));
 
   const LinkStyled = styled(Link)(({ theme }) => ({
-    color: theme.palette.text.secondary,
+    color: theme.palette.grey[100],
     fontWeight: theme.typography.fontWeightMedium,
     textDecoration: "none",
   }));
@@ -73,7 +73,7 @@ const Header = ({ toggleMobileSidebar }: ItemType) => {
       <ToolbarStyled direction='row' alignItems='center' justifyContent='space-between'>
         <Box>        <img style={{ display: "block" }} width={120} height={56} src="/images/logos/logo.svg" alt="elevatehr" />
         </Box>
-        <Stack direction='row' width='max-content' gap={2}>{links.map((link) => <LinkStyled href={link.href}>{link.title}</LinkStyled>)}</Stack>
+        <Stack direction='row' width='max-content' gap={2}>{links.map((link) => <LinkStyled key={link.title} href={link.href}>{link.title}</LinkStyled>)}</Stack>
         <Stack spacing={1} direction="row" alignItems="center">
           <Box
             sx={{

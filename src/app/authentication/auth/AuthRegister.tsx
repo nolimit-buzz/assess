@@ -25,15 +25,15 @@ const AuthRegister = ({ title, subtitle, subtext }: registerType) => (
             <Stack mb={3}>
                 <Typography variant="subtitle1"
                     fontWeight={600} component="label" htmlFor='name' mb="5px">Name</Typography>
-                <CustomTextField id="name" variant="outlined" fullWidth />
+                <CustomTextField id="name" variant="outlined" fullWidth label="Name" placeholder="Enter your name" type="text" />
 
                 <Typography variant="subtitle1"
                     fontWeight={600} component="label" htmlFor='email' mb="5px" mt="25px">Email Address</Typography>
-                <CustomTextField id="email" variant="outlined" fullWidth />
+                <CustomTextField id="email" variant="outlined" fullWidth label="Email Address" placeholder="Enter your email" type="email" />
 
                 <Typography variant="subtitle1"
                     fontWeight={600} component="label" htmlFor='password' mb="5px" mt="25px">Password</Typography>
-                <CustomTextField id="password" variant="outlined" fullWidth />
+                <CustomTextField id="password" variant="outlined" fullWidth label="Password" placeholder="Enter your password" type="password" />
             </Stack>
             <Button color="primary" variant="contained" size="large" fullWidth component={Link} href="/authentication/login">
                 Sign Up

@@ -16,14 +16,14 @@ import {
   Menu,
   MenuItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
 } from "@mui/material";
-import React ,{useState}from "react";
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import BlockIcon from '@mui/icons-material/Block';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import { PHASE_OPTIONS } from '@/app/constants/phaseOptions';
+import React, { useState } from "react";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import BlockIcon from "@mui/icons-material/Block";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import ArchiveIcon from "@mui/icons-material/Archive";
+import { PHASE_OPTIONS } from "@/app/constants/phaseOptions";
 
 interface PhaseOption {
   label: string;
@@ -46,23 +46,32 @@ interface CandidateListSectionProps {
   currentStage: string;
 }
 
-export default function CandidateListSection({ 
-  candidate, 
+export default function CandidateListSection({
+  candidate,
   isSelected,
   onSelectCandidate,
   selectedEntries,
   onUpdateStages,
   disableSelection,
-  currentStage
+  currentStage,
 }: CandidateListSectionProps) {
-  // Skills data for mapping
+  console.log(candidate); // Skills data for mapping
   const skills = candidate?.professional_info?.skills?.split(",");
 
   // Candidate info data for mapping
   const candidateInfo = [
-    { icon: <BriefcaseIcon fontSize="small" />, text: candidate?.professional_info?.experience },
-    { icon: <MoneyIcon fontSize="small" />, text: candidate?.professional_info?.salary_range },
-    { icon: <ClockIcon fontSize="small" />, text: candidate?.professional_info?.start_date },
+    {
+      icon: <BriefcaseIcon fontSize="small" />,
+      text: candidate?.professional_info?.experience,
+    },
+    {
+      icon: <MoneyIcon fontSize="small" />,
+      text: candidate?.professional_info?.salary_range,
+    },
+    {
+      icon: <ClockIcon fontSize="small" />,
+      text: candidate?.professional_info?.start_date,
+    },
     // { icon: <UserSearchIcon fontSize="small" />, text: "Open to trial" },
   ];
 
@@ -87,23 +96,31 @@ export default function CandidateListSection({
     <Paper
       elevation={0}
       sx={{
-        width: "100%",
+        display: "flex",
+        alignItems: "flex-start",
         p: 2,
         borderBottom: "0.8px solid rgba(17, 17, 17, 0.08)",
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
       }}
     >
-      {/* Update Checkbox */}
-      <Box sx={{ position: "absolute", left: 5, top: 22 }}>
+      <Box sx={{ p: 0 }}>
         <Checkbox
+          sx={{ p: 0 }}
           onChange={() => onSelectCandidate(candidate.id)}
           checked={isSelected}
-          icon={<Box sx={{ width: 16, height: 16, borderRadius: 1, border:'1px solid grey' }} />}
+          icon={
+            <Box
+              sx={{
+                width: 16,
+                height: 16,
+                borderRadius: 1,
+                border: "1px solid grey",
+              }}
+            />
+          }
           checkedIcon={
             <Box
               sx={{
+                p: 0,
                 width: 16,
                 height: 16,
                 borderRadius: 1,
@@ -118,138 +135,156 @@ export default function CandidateListSection({
           }
         />
       </Box>
-
-      {/* Candidate name */}
-      <Box sx={{ ml: 5 }}>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 600,
-            fontSize: 18,
-            lineHeight: "18px",
-            color: "rgba(17, 17, 17, 0.92)",
-          }}
-        >
-          {candidate?.personal_info.firstname} {candidate?.personal_info.lastname}
-        </Typography>
-      </Box>
-
-      {/* Candidate info row */}
       <Box
         sx={{
+          width: "100%",
           display: "flex",
-          alignItems: "center",
-          gap: 3.5,
-          mt: 1,
-          ml: 5,
+          flexDirection: "column",
+          alignItems: "start",
+          position: "relative",
         }}
       >
-        {/* Map through candidate info */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 3.5 }}>
-          {candidateInfo.map((item, index) => (
-            <Box key={index} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              {item.icon}
-              <Typography
-                sx={{
-                  color: "rgba(17, 17, 17, 0.68)",
-                  fontSize: 16,
-                  lineHeight: "16px",
-                }}
-              >
-                {item.text}
-              </Typography>
-            </Box>
-          ))}
+        {/* Update Checkbox */}
+
+        {/* Candidate name */}
+        <Box sx={{ ml: "12px" }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 600,
+              fontSize: 18,
+              lineHeight: "18px",
+              color: "rgba(17, 17, 17, 0.92)",
+            }}
+          >
+            {candidate?.personal_info.firstname}{" "}
+            {candidate?.personal_info.lastname}
+          </Typography>
         </Box>
 
-        {/* Resume link */}
-        <Link
-          href="#"
-          underline="always"
+        {/* Candidate info row */}
+        <Box
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 0.5,
-            color: "rgba(17, 17, 17, 0.92)",
-            fontSize: 16,
-            lineHeight: "16px",
+            gap: 3.5,
+            mt: 1,
+            ml: "12px",
           }}
         >
-          Resume <ArrowUpRightIcon sx={{ fontSize: 20 }} />
-        </Link>
-      </Box>
+          {/* Map through candidate info */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 3.5 }}>
+            {candidateInfo.map((item, index) => (
+              <Box
+                key={index}
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              >
+                {item.icon}
+                <Typography
+                  sx={{
+                    color: "rgba(17, 17, 17, 0.68)",
+                    fontSize: 16,
+                    lineHeight: "16px",
+                  }}
+                >
+                  {item.text}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
 
-      {/* Skills chips */}
-      <Box sx={{ display: "flex", gap: 1, mt: 2, ml: 5 }}>
-        {skills.map((skill, index) => (
-          <Chip
-            key={index}
-            label={skill}
+          {/* Resume link */}
+          <Link
+            href="#"
+            underline="always"
             sx={{
-              bgcolor: "#efefef",
-              color: "rgba(17, 17, 17, 0.68)",
-              borderRadius: "28px",
-              fontSize: 14,
-              fontWeight: 400,
-            }}
-          />
-        ))}
-      </Box>
-
-      {/* Quick Actions Button - Always visible */}
-      <Button
-        variant="outlined"
-        onClick={handleClick}
-        endIcon={<ChevronDownIcon />}
-        sx={{
-          position: 'absolute',
-          right: 16,
-          top: 16,
-          textTransform: 'none',
-          borderColor: 'divider',
-          color: 'text.secondary',
-          '&:hover': {
-            borderColor: 'primary.main',
-            backgroundColor: 'transparent',
-          },
-        }}
-      >
-        Quick actions
-      </Button>
-
-      {/* Quick Actions Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        {PHASE_OPTIONS[currentStage]?.map((option: PhaseOption) => (
-          <MenuItem
-            key={option.action}
-            onClick={() => handleAction(option.action)}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              py: 1.5,
-              px: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              color: "rgba(17, 17, 17, 0.92)",
+              fontSize: 16,
+              lineHeight: "16px",
             }}
           >
-            <ListItemIcon>
-              {React.createElement(option.icon)}
-            </ListItemIcon>
-            <ListItemText primary={option.label} />
-          </MenuItem>
-        ))}
-      </Menu>
+            Resume <ArrowUpRightIcon sx={{ fontSize: 20 }} />
+          </Link>
+        </Box>
+
+        {/* Skills chips */}
+        <Box sx={{ display: "flex", gap: 1, mt: 2, ml: "12px" }}>
+          {skills.map((skill, index) => (
+            <Chip
+              key={index}
+              label={skill}
+              sx={{
+                bgcolor: "#efefef",
+                color: "rgba(17, 17, 17, 0.68)",
+                borderRadius: "28px",
+                fontSize: 14,
+                fontWeight: 400,
+              }}
+            />
+          ))}
+        </Box>
+
+        {/* Quick Actions Button - Always visible */}
+        <Button
+          variant="outlined"
+          onClick={handleClick}
+          endIcon={<ChevronDownIcon />}
+          sx={{
+            position: "absolute",
+            right: 16,
+            top: 16,
+            textTransform: "none",
+            borderColor: "divider",
+            color: "text.secondary",
+            "&:hover": {
+              borderColor: "primary.main",
+              backgroundColor: "transparent",
+            },
+          }}
+        >
+          Quick actions
+        </Button>
+
+        {/* Quick Actions Menu */}
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          {PHASE_OPTIONS[currentStage]?.map((option: PhaseOption) => {
+            const IconComponent = option.icon;
+            return (
+              <MenuItem
+                key={option.action}
+                onClick={() => handleAction(option.action)}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  py: 1.5,
+                  px: 2,
+                }}
+              >
+                <ListItemIcon>
+                  <IconComponent />
+                </ListItemIcon>
+                <ListItemText primary={option.label} />
+              </MenuItem>
+            );
+          })}
+        </Menu>
+      </Box>
     </Paper>
   );
 }

@@ -19,8 +19,8 @@ const baselightTheme = createTheme({
     },
     secondary: {
       main: "#06B776",
-      light: "#e7ecf0",
-      dark: "#707a82",
+      light: "#EAF6F2",
+      dark: "#D6EBE4",
     },
   
     success: {
@@ -50,7 +50,7 @@ const baselightTheme = createTheme({
     grey: {
       100: "#111111",
       200: "rgba(17, 17, 17, 0.68)",
-      // 300: "#DFE5EF",
+      300: "#224F3E",
       // 400: "#7C8FAC",
       // 500: "#5A6A85",
       // 600: "#111c2d",

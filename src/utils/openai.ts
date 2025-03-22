@@ -58,7 +58,12 @@ export async function generateInput(request: { jobTitle: string, jobLevel: strin
             const parsedResponse = JSON.parse(generatedText);
             
             // Filter fields if requested
+            console.log('Parsed response:', field);
             if (field) {
+                console.log('Parsed response:',  {
+                    jobTitle: parsedResponse.jobTitle,
+                    [field]: parsedResponse[field]
+                })
                 return {
                     jobTitle: parsedResponse.jobTitle,
                     [field]: parsedResponse[field]

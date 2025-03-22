@@ -69,7 +69,7 @@ const StyledTabs = styled(Tabs)(({ theme }) => ({
   alignItems: 'flex-start',
   gap: '10px',
   borderRadius: '8px',
-  background: '#EAF6F2',
+  background: theme.palette.secondary.light,
   minHeight: '28px',
 
   '& .Mui-selected': {
@@ -79,7 +79,7 @@ const StyledTabs = styled(Tabs)(({ theme }) => ({
     display: 'block',
     height: '100%',
     width: '100%',
-    background: "#06B776",
+    background: theme.palette.secondary.main,
     color: 'white',
     zIndex: 0,
     borderRadius: '4px',
@@ -98,6 +98,7 @@ const StyledTab = styled(Tab)(({ theme }) => ({
   width: 'max-content',
   minWidth: 'max-content',
   minHeight: '28px',
+  color:theme.palette.grey[100]
 
 }));
 

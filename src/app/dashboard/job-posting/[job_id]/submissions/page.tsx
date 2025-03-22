@@ -1,7 +1,7 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import Head from 'next/head';
-import { useRouter, useParams } from 'next/navigation';
+"use client";
+import React, { useState, useEffect } from "react";
+import Head from "next/head";
+import { useRouter, useParams } from "next/navigation";
 import {
   Box,
   Container,
@@ -28,47 +28,47 @@ import {
   ListItemText,
   Stack,
   Card,
-  Skeleton
-} from '@mui/material';
-import Link from 'next/link';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ClockIcon from '@mui/icons-material/AccessTime';
-import FlashIcon from '@mui/icons-material/BoltSharp';
-import LocationIcon from '@mui/icons-material/LocationOnOutlined';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import WorkIcon from '@mui/icons-material/Work';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import EditIcon from '@mui/icons-material/Edit';
-import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
-import PlaceIcon from '@mui/icons-material/Place';
-import BoltIcon from '@mui/icons-material/Bolt';
-import CloseIcon from '@mui/icons-material/Close';
-import { Edit, WorkOutline } from '@mui/icons-material';
-import ApplicantsList from '@/app/dashboard/components/dashboard/ApplicantsList';
-import CandidateListSection from '@/app/dashboard/components/dashboard/CandidatesListSection';
+  Skeleton,
+} from "@mui/material";
+import Link from "next/link";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ClockIcon from "@mui/icons-material/AccessTime";
+import FlashIcon from "@mui/icons-material/BoltSharp";
+import LocationIcon from "@mui/icons-material/LocationOnOutlined";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import WorkIcon from "@mui/icons-material/Work";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import EditIcon from "@mui/icons-material/Edit";
+import AccessTimeFilledIcon from "@mui/icons-material/AccessTimeFilled";
+import PlaceIcon from "@mui/icons-material/Place";
+import BoltIcon from "@mui/icons-material/Bolt";
+import CloseIcon from "@mui/icons-material/Close";
+import { Edit, WorkOutline } from "@mui/icons-material";
+import ApplicantsList from "@/app/dashboard/components/dashboard/ApplicantsList";
+import CandidateListSection from "@/app/dashboard/components/dashboard/CandidatesListSection";
 import { useTheme } from "@mui/material/styles";
-import QuickActionsDropdown from '@/app/dashboard/components/QuickActionsDropdown';
-import BlockIcon from '@mui/icons-material/Block';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import { PHASE_OPTIONS } from '@/app/constants/phaseOptions';
+import QuickActionsDropdown from "@/app/dashboard/components/QuickActionsDropdown";
+import BlockIcon from "@mui/icons-material/Block";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import ArchiveIcon from "@mui/icons-material/Archive";
+import { PHASE_OPTIONS } from "@/app/constants/phaseOptions";
 
 export default function Home() {
-  const theme = useTheme()
+  const theme = useTheme();
   const [primaryTabValue, setPrimaryTabValue] = useState(0);
   const [subTabValue, setSubTabValue] = useState(0);
   const [filterMenuAnchor, setFilterMenuAnchor] = useState(null);
   const [quickActionsAnchor, setQuickActionsAnchor] = useState(null);
   const [filters, setFilters] = useState({
-    yearsOfExperience: '',
-    salaryMin: '',
-    salaryMax: '',
-    requiredSkills: '',
-    availability: '',
-    trial: ''
+    yearsOfExperience: "",
+    salaryMin: "",
+    salaryMax: "",
+    requiredSkills: "",
+    availability: "",
+    trial: "",
   });
   const [filteredCandidates, setFilteredCandidates] = useState([]);
   const [jobDetails, setJobDetails] = useState(null);
@@ -81,7 +81,7 @@ export default function Home() {
   const params = useParams();
 
   const getJobId = () => {
-    return params['job_id'];
+    return params["job_id"];
   };
 
   useEffect(() => {
@@ -90,14 +90,17 @@ export default function Home() {
         setLoading(true);
         setError(null);
         try {
-          const token = localStorage.getItem('jwt');
+          const token = localStorage.getItem("jwt");
           const jobId = getJobId();
-          const response = await fetch(`https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${jobId}`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
+          const response = await fetch(
+            `https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${jobId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            },
+          );
 
           if (!response.ok) {
             throw new Error(`Failed to fetch job details: ${response.status}`);
@@ -122,15 +125,18 @@ export default function Home() {
       setLoading(true);
       setError(null);
       try {
-        const token = localStorage.getItem('jwt');
+        const token = localStorage.getItem("jwt");
         const jobId = getJobId();
-        const stage = subTabValue === 0 ? 'new' : getStageValue(subTabValue);
-        const response = await fetch(`https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${jobId}/applications?stage=${stage}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        const stage = subTabValue === 0 ? "new" : getStageValue(subTabValue);
+        const response = await fetch(
+          `https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${jobId}/applications?stage=${stage}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
 
         if (!response.ok) {
           throw new Error(`Failed to fetch candidates: ${response.status}`);
@@ -155,78 +161,82 @@ export default function Home() {
   const getStageValue = (tabValue) => {
     switch (tabValue) {
       case 1:
-        return 'skill_assessment';
+        return "skill_assessment";
       case 2:
-        return 'interview';
+        return "interview";
       case 3:
-        return 'acceptance';
+        return "acceptance";
       case 4:
-        return 'archived';
+        return "archived";
       default:
-        return 'new';
+        return "new";
     }
   };
 
   const handleFilterChange = (filterName, value) => {
     setFilters({
       ...filters,
-      [filterName]: value
+      [filterName]: value,
     });
   };
 
-  const applyFilters = () => {
-    let filtered = [...candidates];
-
-    if (filters.yearsOfExperience) {
-      const [minYears, maxYears] = filters.yearsOfExperience.split('-').map(num => parseInt(num));
-      if (maxYears) {
-        filtered = filtered.filter(candidate =>
-          candidate.yearsNum >= minYears && candidate.yearsNum <= maxYears
-        );
-      } else {
-        filtered = filtered.filter(candidate => candidate.yearsNum >= minYears);
+  const applyFilters = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem("jwt");
+      const jobId = getJobId();
+      const stage = subTabValue === 0 ? "new" : getStageValue(subTabValue);
+      
+      // Build query parameters from filters
+      const queryParams = new URLSearchParams();
+      if (filters.yearsOfExperience) {
+        const [minYears, maxYears] = filters.yearsOfExperience.split("-").map(num => parseInt(num));
+        queryParams.append("min_experience", minYears.toString());
+        if (maxYears) {
+          queryParams.append("max_experience", maxYears.toString());
+        }
       }
-    }
+      if (filters.salaryMin) queryParams.append("min_salary", filters.salaryMin);
+      if (filters.salaryMax) queryParams.append("max_salary", filters.salaryMax);
+      if (filters.requiredSkills) queryParams.append("skills", filters.requiredSkills);
+      if (filters.availability) queryParams.append("availability", filters.availability);
+      if (filters.trial) queryParams.append("trial", filters.trial);
+      queryParams.append("stage", stage);
 
-    if (filters.salaryMin) {
-      const minSalary = parseInt(filters.salaryMin);
-      filtered = filtered.filter(candidate => candidate.salaryMax >= minSalary);
-    }
-
-    if (filters.salaryMax) {
-      const maxSalary = parseInt(filters.salaryMax);
-      filtered = filtered.filter(candidate => candidate.salaryMin <= maxSalary);
-    }
-
-    if (filters.requiredSkills) {
-      filtered = filtered.filter(candidate =>
-        candidate.skills.includes(filters.requiredSkills)
+      const response = await fetch(
+        `https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${jobId}/applications?${queryParams.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
-    }
 
-    if (filters.availability) {
-      filtered = filtered.filter(candidate =>
-        candidate.availabilityValue === filters.availability
-      );
-    }
+      if (!response.ok) {
+        throw new Error(`Failed to fetch filtered candidates: ${response.status}`);
+      }
 
-    if (filters.trial) {
-      filtered = filtered.filter(candidate =>
-        candidate.trialValue === filters.trial
-      );
+      const data = await response.json();
+      setFilteredCandidates(data);
+      setCandidates(data); // Update the base candidates list as well
+    } catch (err) {
+      console.error("Error applying filters:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-
-    setFilteredCandidates(filtered);
   };
 
   const clearFilters = () => {
     setFilters({
-      yearsOfExperience: '',
-      salaryMin: '',
-      salaryMax: '',
-      requiredSkills: '',
-      availability: '',
-      trial: ''
+      yearsOfExperience: "",
+      salaryMin: "",
+      salaryMax: "",
+      requiredSkills: "",
+      availability: "",
+      trial: "",
     });
     setFilteredCandidates(candidates);
   };
@@ -259,21 +269,28 @@ export default function Home() {
 
   const getSkillChipColor = (skill) => {
     const colors = {
-      'Communication': { bg: '#FBE9E7', color: '#D84315' },
-      'Data analysis': { bg: '#E1F5FE', color: '#0288D1' },
-      'Strategic Thinking': { bg: '#F3E5F5', color: '#7B1FA2' },
-      'Empathy': { bg: '#E8EAF6', color: '#3949AB' },
-      'Prioritization': { bg: '#E8F5E9', color: '#388E3C' },
-      'Research': { bg: '#FFEBEE', color: '#C62828' }
+      Communication: { bg: "#FBE9E7", color: "#D84315" },
+      "Data analysis": { bg: "#E1F5FE", color: "#0288D1" },
+      "Strategic Thinking": { bg: "#F3E5F5", color: "#7B1FA2" },
+      Empathy: { bg: "#E8EAF6", color: "#3949AB" },
+      Prioritization: { bg: "#E8F5E9", color: "#388E3C" },
+      Research: { bg: "#FFEBEE", color: "#C62828" },
     };
 
-    return colors[skill] || { bg: '#E0E0E0', color: '#616161' };
+    return colors[skill] || { bg: "#E0E0E0", color: "#616161" };
   };
 
   const renderJobDescription = () => {
     if (loading) {
       return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "400px",
+          }}
+        >
           <CircularProgress />
         </Box>
       );
@@ -281,8 +298,10 @@ export default function Home() {
 
     if (error) {
       return (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography color="error" variant="h6">Error loading job details</Typography>
+        <Box sx={{ p: 3, textAlign: "center" }}>
+          <Typography color="error" variant="h6">
+            Error loading job details
+          </Typography>
           <Typography color="textSecondary">{error}</Typography>
           <Button
             variant="contained"
@@ -298,10 +317,10 @@ export default function Home() {
       );
     }
 
-    const jobData = jobDetails 
+    const jobData = jobDetails;
 
     return (
-      <Stack direction={'row'} gap={4}>
+      <Stack direction={"row"} gap={4}>
         <Card
           sx={{
             width: 308,
@@ -319,13 +338,13 @@ export default function Home() {
             color="rgba(17, 17, 17, 0.92)"
             mb={2}
             sx={{
-              color: 'rgba(17, 17, 17, 0.92)',
-              textTransform: 'capitalize', // Equivalent to leading-trim: both and text-edge: cap
-              fontSize: '24px',
-              fontStyle: 'normal',
+              color: "rgba(17, 17, 17, 0.92)",
+              textTransform: "capitalize", // Equivalent to leading-trim: both and text-edge: cap
+              fontSize: "24px",
+              fontStyle: "normal",
               fontWeight: 600,
               lineHeight: 1, // Equivalent to 100%
-              letterSpacing: '0.12px',
+              letterSpacing: "0.12px",
             }}
           >
             {jobData?.title}
@@ -364,7 +383,7 @@ export default function Home() {
             />
             <Chip
               icon={<LocationIcon />}
-              label={jobData?.location?.split(' ')?.join(', ')}
+              label={jobData?.location?.split(" ")?.join(", ")}
               sx={{
                 bgcolor: "#edeef1",
                 color: "rgba(17, 17, 17, 0.84)",
@@ -377,17 +396,12 @@ export default function Home() {
                 },
               }}
             />
-            
           </Stack>
 
           <Divider sx={{ width: "100%", my: 2 }} />
 
           <Stack spacing={2.5} mt={1}>
-            <Box
-              display="flex"
-              alignItems="center"
-              gap={1}
-            >
+            <Box display="flex" alignItems="center" gap={1}>
               <FlashIcon sx={{ color: "#00C853", width: 20, height: 20 }} />
               <Typography
                 fontWeight={500}
@@ -398,12 +412,7 @@ export default function Home() {
               </Typography>
             </Box>
             {jobData?.requirements?.map((requirement, index) => (
-              <Box
-                key={index}
-                display="flex"
-                alignItems="center"
-                gap={1}
-              >
+              <Box key={index} display="flex" alignItems="center" gap={1}>
                 <FlashIcon sx={{ color: "#00C853", width: 20, height: 20 }} />
                 <Typography
                   fontWeight={500}
@@ -493,8 +502,7 @@ export default function Home() {
                 letterSpacing: "0.16px",
                 lineHeight: "24px",
               }}
-            >
-            </Typography>
+            ></Typography>
           </Box>
 
           <Divider sx={{ my: 3 }} />
@@ -514,21 +522,24 @@ export default function Home() {
             >
               Job Responsibilities
             </Typography>
-            <Box dangerouslySetInnerHTML={{ __html: jobData?.responsibilities }} sx={{
-              '& ul': {
-                marginBlockStart: 0,
-                paddingInlineStart: "20px !important",
-                '& li': {
-                  display: "list-item",
-                  listStyleType: "disc",
-                  p: 0,
-                  pb: 0.5,
-                  color: "rgba(17, 17, 17, 0.84)",
-                  letterSpacing: "0.16px",
-                  lineHeight: "24px",
-                }
-              }
-            }} />
+            <Box
+              dangerouslySetInnerHTML={{ __html: jobData?.responsibilities }}
+              sx={{
+                "& ul": {
+                  marginBlockStart: 0,
+                  paddingInlineStart: "20px !important",
+                  "& li": {
+                    display: "list-item",
+                    listStyleType: "disc",
+                    p: 0,
+                    pb: 0.5,
+                    color: "rgba(17, 17, 17, 0.84)",
+                    letterSpacing: "0.16px",
+                    lineHeight: "24px",
+                  },
+                },
+              }}
+            />
           </Box>
 
           <Divider sx={{ my: 3 }} />
@@ -549,7 +560,7 @@ export default function Home() {
               Expectations of the Role
             </Typography>
             <List sx={{ maxWidth: 660, pl: 2 }}>
-              {jobData?.expectations?.split(',')?.map((expectation, index) => (
+              {jobData?.expectations?.split("|||")?.map((expectation, index) => (
                 <ListItem
                   key={index}
                   sx={{
@@ -580,57 +591,77 @@ export default function Home() {
   };
 
   const handleSelectCandidate = (id: number) => {
-    setSelectedEntries(prev => {
+    setSelectedEntries((prev) => {
       if (prev.includes(id)) {
-        return prev.filter(entryId => entryId !== id);
+        return prev.filter((entryId) => entryId !== id);
       } else {
         return [...prev, id];
       }
     });
   };
 
-  const handleUpdateStages = async (stage: string) => {
-    console.log(stage)
+  const handleUpdateStages = async (stage: string, entries: number[] = []) => {
+    console.log(stage, entries);
     try {
-      const jwt = localStorage.getItem('jwt');
-      const entriesToUpdate = selectedEntries || selectedEntries; // Use provided entries or selected entries
+      const jwt = localStorage.getItem("jwt");
+      const entriesToUpdate = entries.length ? entries : selectedEntries; // Use provided entries or selected entries
 
-      const response = await fetch('https://app.elevatehr.ai/wp-json/elevatehr/v1/applications/move-stage', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwt}`,
+      const response = await fetch(
+        "https://app.elevatehr.ai/wp-json/elevatehr/v1/applications/move-stage",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${jwt}`,
+          },
+          body: JSON.stringify({
+            stage,
+            entries: entriesToUpdate,
+          }),
         },
-        body: JSON.stringify({
-          stage,
-          entries: entriesToUpdate
-        })
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to update stage');
+        throw new Error("Failed to update stage");
       }
-      
+
       // Clear selections after successful update
       setSelectedEntries([]);
-      
+
       // Refetch candidates for the current stage
       // await fetchCandidates();
     } catch (error) {
-      console.error('Error updating stages:', error);
+      console.error("Error updating stages:", error);
     }
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#F5F7FA' }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        bgcolor: "#F5F7FA",
+      }}
+    >
       <Head>
         <title>ElevateHR - Product Manager Candidates</title>
-        <meta name="description" content="Product Manager candidates for review" />
+        <meta
+          name="description"
+          content="Product Manager candidates for review"
+        />
       </Head>
 
       <Container maxWidth="xl" sx={{ flexGrow: 1, py: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: 2,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton sx={{ mr: 1 }} aria-label="back">
               <ArrowBackIcon />
             </IconButton>
@@ -642,19 +673,19 @@ export default function Home() {
             variant="contained"
             sx={{
               backgroundColor: theme.palette.primary.main,
-              color:theme.palette.text.secondary,
+              color: theme.palette.text.secondary,
               borderRadius: 2,
-              textTransform: 'none',
-              '&:hover': {
-                bgcolor: '#303F9F'
-              }
+              textTransform: "none",
+              "&:hover": {
+                bgcolor: "#303F9F",
+              },
             }}
           >
             Close responses for this job
           </Button>
         </Box>
 
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
           <Tabs
             value={primaryTabValue}
             onChange={handlePrimaryTabChange}
@@ -664,31 +695,44 @@ export default function Home() {
             <Tab
               label="Applications"
               sx={{
-                textTransform: 'none',
-                fontWeight: primaryTabValue === 0 ? 'bold' : 'normal',
-                color: primaryTabValue === 0? theme.palette.secondary.main : theme.palette.grey[100]
+                textTransform: "none",
+                fontWeight: primaryTabValue === 0 ? "bold" : "normal",
+                color:
+                  primaryTabValue === 0
+                    ? theme.palette.secondary.main
+                    : theme.palette.grey[100],
               }}
             />
             <Tab
               label="Job description"
               sx={{
-                textTransform: 'none',
-                fontWeight: primaryTabValue === 1 ? 'bold' : 'normal',
-                color: primaryTabValue === 1? theme.palette.secondary.main : theme.palette.grey[100]
+                textTransform: "none",
+                fontWeight: primaryTabValue === 1 ? "bold" : "normal",
+                color:
+                  primaryTabValue === 1
+                    ? theme.palette.secondary.main
+                    : theme.palette.grey[100],
               }}
             />
           </Tabs>
         </Box>
 
         {primaryTabValue === 0 ? (
-          <Stack direction='row' gap={3}>
+          <Stack direction="row" gap={3}>
             <Box sx={{ width: 300, flexShrink: 0 }}>
               <Paper sx={{ p: 3, mb: 2, borderRadius: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 2,
+                  }}
+                >
                   <Typography variant="h6">Filters:</Typography>
                   <Button
                     startIcon={<CloseIcon />}
-                    sx={{ color: '#757575', textTransform: 'none' }}
+                    sx={{ color: "#757575", textTransform: "none" }}
                     onClick={clearFilters}
                   >
                     Clear filter
@@ -696,7 +740,9 @@ export default function Home() {
                 </Box>
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>Years of experience</Typography>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                    Years of experience
+                  </Typography>
                   <FormControl fullWidth>
                     <Select
                       value={filters.yearsOfExperience}
@@ -704,7 +750,9 @@ export default function Home() {
                       renderValue={(selected) => selected || "Select years"}
                       sx={{ borderRadius: 1 }}
                       endAdornment={<KeyboardArrowDownIcon />}
-                      onChange={(e) => handleFilterChange('yearsOfExperience', e.target.value)}
+                      onChange={(e) =>
+                        handleFilterChange("yearsOfExperience", e.target.value)
+                      }
                     >
                       <MenuItem value="">All years</MenuItem>
                       <MenuItem value="1-3">1-3 years</MenuItem>
@@ -715,13 +763,17 @@ export default function Home() {
                 </Box>
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>Salary expectation:</Typography>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                    Salary expectation:
+                  </Typography>
                   <TextField
                     placeholder="Min: 000000"
                     fullWidth
                     sx={{ mb: 1, borderRadius: 1 }}
                     value={filters.salaryMin}
-                    onChange={(e) => handleFilterChange('salaryMin', e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("salaryMin", e.target.value)
+                    }
                     type="number"
                   />
                   <TextField
@@ -729,13 +781,17 @@ export default function Home() {
                     fullWidth
                     sx={{ borderRadius: 1 }}
                     value={filters.salaryMax}
-                    onChange={(e) => handleFilterChange('salaryMax', e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("salaryMax", e.target.value)
+                    }
                     type="number"
                   />
                 </Box>
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>Required skills</Typography>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                    Required skills
+                  </Typography>
                   <FormControl fullWidth>
                     <Select
                       value={filters.requiredSkills}
@@ -743,12 +799,16 @@ export default function Home() {
                       renderValue={(selected) => selected || "Select skills"}
                       sx={{ borderRadius: 1 }}
                       endAdornment={<KeyboardArrowDownIcon />}
-                      onChange={(e) => handleFilterChange('requiredSkills', e.target.value)}
+                      onChange={(e) =>
+                        handleFilterChange("requiredSkills", e.target.value)
+                      }
                     >
                       <MenuItem value="">All skills</MenuItem>
                       <MenuItem value="Communication">Communication</MenuItem>
                       <MenuItem value="Data analysis">Data analysis</MenuItem>
-                      <MenuItem value="Strategic Thinking">Strategic Thinking</MenuItem>
+                      <MenuItem value="Strategic Thinking">
+                        Strategic Thinking
+                      </MenuItem>
                       <MenuItem value="Empathy">Empathy</MenuItem>
                       <MenuItem value="Prioritization">Prioritization</MenuItem>
                       <MenuItem value="Research">Research</MenuItem>
@@ -757,10 +817,14 @@ export default function Home() {
                 </Box>
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>Availability:</Typography>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                    Availability:
+                  </Typography>
                   <RadioGroup
                     value={filters.availability}
-                    onChange={(e) => handleFilterChange('availability', e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("availability", e.target.value)
+                    }
                   >
                     <FormControlLabel
                       value="immediately"
@@ -786,10 +850,14 @@ export default function Home() {
                 </Box>
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>Trial:</Typography>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                    Trial:
+                  </Typography>
                   <RadioGroup
                     value={filters.trial}
-                    onChange={(e) => handleFilterChange('trial', e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("trial", e.target.value)
+                    }
                   >
                     <FormControlLabel
                       value="open-to-trial"
@@ -808,14 +876,14 @@ export default function Home() {
                   variant="contained"
                   fullWidth
                   sx={{
-                    bgcolor: '#A5AEFF',
-                    color: '#2A3574',
-                    textTransform: 'none',
+                    bgcolor: "#A5AEFF",
+                    color: "#2A3574",
+                    textTransform: "none",
                     borderRadius: 2,
                     py: 1.5,
-                    '&:hover': {
-                      bgcolor: '#8C99FF'
-                    }
+                    "&:hover": {
+                      bgcolor: "#8C99FF",
+                    },
                   }}
                   onClick={applyFilters}
                 >
@@ -825,149 +893,198 @@ export default function Home() {
             </Box>
             <Box sx={{ flexGrow: 1 }}>
               {/* Your existing tabs */}
-              <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3, backgroundColor:"#ffffff !important", borderRadius:"10px" ,paddingX:"20px",}}>
-                  <Tabs
-                    value={subTabValue}
-                    onChange={handleSubTabChange}
-                    indicatorColor="secondary"
-                    TabIndicatorProps={{e:"4px"}}
-                    variant="scrollable"
-                    scrollButtons="auto"
-                    sx={{width:'100%', alignItems:'center'}}
-                  >
-                    <Tab
-                      label="Application Review"
-                      sx={{
-                        textTransform: 'none',
-                        color: subTabValue === 0 ? theme.palette.grey[100] : theme.palette.grey[200],
-                        flex:1,
-                      }}
-                    />
-                    <Tab
-                      label="Skill assessment"
-                      sx={{
-                        textTransform: 'none',
-                        color: subTabValue === 1 ? theme.palette.grey[100] : theme.palette.grey[200],
-                        flex:1,
-                      }}
-                    />
-                    <Tab
-                      label="Interviews"
-                      sx={{
-                        textTransform: 'none',
-                        color: subTabValue === 2 ? theme.palette.grey[100] : theme.palette.grey[200],
-                        flex:1,
-                      }}
-                    />
-                    <Tab
-                      label="Acceptance"
-                      sx={{
-                        textTransform: 'none',
-                        color: subTabValue === 3 ? theme.palette.grey[100] : theme.palette.grey[200],
-                        flex:1,
-                      }}
-                    />
-                    <Tab
-                      label="Archived"
-                      sx={{
-                        textTransform: 'none',
-                        color: subTabValue === 4 ? theme.palette.grey[100] : theme.palette.grey[200],
-                        flex:1,
-                      }}
-                    />
-                  </Tabs>
-                </Box>
-              <Paper
-                   elevation={0}
-                   sx={{
-                     width: "100%",
-                     maxWidth: 956,
-                     bgcolor: "background.paper",
-                     borderRadius: 2,
-                     overflow: "hidden",
-                     position: "relative",
-                   }}
-                 >
-              {/* Actions bar inside Paper, before candidates list */}
-              {selectedEntries?.length > 0 && subTabValue !== 3 && ( // Hide for acceptance phase
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    p: 2,
-                    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-                  }}
+              <Box
+                sx={{
+                  borderBottom: 1,
+                  borderColor: "divider",
+                  mb: 3,
+                  backgroundColor: "#ffffff !important",
+                  borderRadius: "10px",
+                  paddingX: "20px",
+                }}
+              >
+                <Tabs
+                  value={subTabValue}
+                  onChange={handleSubTabChange}
+                  indicatorColor="secondary"
+                  TabIndicatorProps={{ e: "4px" }}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  sx={{ width: "100%", alignItems: "center" }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="body1" color={theme.palette.grey[100]}>
-                      {selectedEntries?.length} candidates selected
-                    </Typography>
-                    <IconButton 
-                      size="small" 
-                      onClick={() => setSelectedEntries([])}
-                      sx={{ ml: 1 }}
+                  <Tab
+                    label="Application Review"
+                    sx={{
+                      textTransform: "none",
+                      color:
+                        subTabValue === 0
+                          ? theme.palette.grey[100]
+                          : theme.palette.grey[200],
+                      flex: 1,
+                    }}
+                  />
+                  <Tab
+                    label="Skill assessment"
+                    sx={{
+                      textTransform: "none",
+                      color:
+                        subTabValue === 1
+                          ? theme.palette.grey[100]
+                          : theme.palette.grey[200],
+                      flex: 1,
+                    }}
+                  />
+                  <Tab
+                    label="Interviews"
+                    sx={{
+                      textTransform: "none",
+                      color:
+                        subTabValue === 2
+                          ? theme.palette.grey[100]
+                          : theme.palette.grey[200],
+                      flex: 1,
+                    }}
+                  />
+                  <Tab
+                    label="Acceptance"
+                    sx={{
+                      textTransform: "none",
+                      color:
+                        subTabValue === 3
+                          ? theme.palette.grey[100]
+                          : theme.palette.grey[200],
+                      flex: 1,
+                    }}
+                  />
+                  <Tab
+                    label="Archived"
+                    sx={{
+                      textTransform: "none",
+                      color:
+                        subTabValue === 4
+                          ? theme.palette.grey[100]
+                          : theme.palette.grey[200],
+                      flex: 1,
+                    }}
+                  />
+                </Tabs>
+              </Box>
+              <Paper
+                elevation={0}
+                sx={{
+                  width: "100%",
+                  //  maxWidth: 956,
+                  bgcolor: "background.paper",
+                  borderRadius: 2,
+                  overflow: "hidden",
+                  position: "relative",
+                }}
+              >
+                {/* Actions bar inside Paper, before candidates list */}
+                {selectedEntries?.length > 0 &&
+                  subTabValue !== 3 && ( // Hide for acceptance phase
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        p: 2,
+                        borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+                      }}
                     >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                   </Box>
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    {PHASE_OPTIONS[getStageValue(subTabValue)]?.map((option) => (
-                      <Button
-                        key={option.action}
-                        variant="outlined"
-                        startIcon={option.icon}
-                        onClick={() => handleUpdateStages(option.action)}
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Typography
+                          variant="body1"
+                          color={theme.palette.grey[100]}
+                        >
+                          {selectedEntries?.length} candidates selected
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          onClick={() => setSelectedEntries([])}
+                          sx={{ ml: 1 }}
+                        >
+                          <CloseIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+
+                      <Box sx={{ display: "flex", gap: 2 }}>
+                        {PHASE_OPTIONS[getStageValue(subTabValue)]?.map(
+                          (option) => (
+                            <Button
+                              key={option.action}
+                              variant="outlined"
+                              startIcon={<option.icon />}
+                              onClick={() => handleUpdateStages(option.action)}
+                              sx={{
+                                color:
+                                  option.action === "archived"
+                                    ? "text.secondary"
+                                    : "primary.main",
+                                borderColor:
+                                  option.action === "archived"
+                                    ? "divider"
+                                    : "primary.main",
+                                "&:hover": {
+                                  borderColor:
+                                    option.action === "archived"
+                                      ? "divider"
+                                      : "primary.dark",
+                                  bgcolor:
+                                    option.action === "archived"
+                                      ? "action.hover"
+                                      : "primary.lighter",
+                                },
+                              }}
+                            >
+                              {option.label}
+                            </Button>
+                          ),
+                        )}
+                      </Box>
+                    </Box>
+                  )}
+
+                {/* Candidates list */}
+                {loading
+                  ? Array.from({ length: 5 }).map((_, index) => (
+                      <Skeleton
+                        key={index}
+                        variant="rectangular"
+                        width="100%"
+                        height={150}
+                        sx={{ mb: 2, borderRadius: 2 }}
+                      />
+                    ))
+                  : filteredCandidates?.applications?.map((candidate) => (
+                      <Box
+                        key={candidate.id}
                         sx={{
-                          color: option.action === 'archived' ? 'text.secondary' : 'primary.main',
-                          borderColor: option.action === 'archived' ? 'divider' : 'primary.main',
-                          '&:hover': {
-                            borderColor: option.action === 'archived' ? 'divider' : 'primary.dark',
-                            bgcolor: option.action === 'archived' ? 'action.hover' : 'primary.lighter',
+                          borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+                          "&:last-child": {
+                            borderBottom: "none",
                           },
                         }}
                       >
-                        {option.label}
-                      </Button>
+                        <CandidateListSection
+                          candidate={candidate}
+                          isSelected={selectedEntries?.includes(candidate.id)}
+                          onSelectCandidate={handleSelectCandidate}
+                          onUpdateStages={handleUpdateStages}
+                          disableSelection={subTabValue === 3}
+                          currentStage={getStageValue(subTabValue)}
+                          selectedEntries={selectedEntries}
+                        />
+                      </Box>
                     ))}
-                  </Box>
-                </Box>
-              )}
-
-              {/* Candidates list */}
-              {loading ? (
-                Array.from({ length: 5 }).map((_, index) => (
-                  <Skeleton key={index} variant="rectangular" width="100%" height={150} sx={{ mb: 2, borderRadius: 2 }} />
-                ))
-              ) : (
-                
-                  filteredCandidates?.applications?.map((candidate) => (
-                    <Box 
-                      key={candidate.id}
-                      sx={{ 
-                        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-                        '&:last-child': {
-                          borderBottom: 'none'
-                        }
-                      }}
-                    >
-                      <CandidateListSection 
-                        candidate={candidate}
-                        isSelected={selectedEntries?.includes(candidate.id)}
-                        onSelectCandidate={handleSelectCandidate}
-                        onUpdateStages={handleUpdateStages}
-                        disableSelection={subTabValue === 3}
-                        currentStage={getStageValue(subTabValue)}
-                        selectedEntries={selectedEntries}
-                      />
-                    </Box>
-                  ))
-              
-              )}
               </Paper>
             </Box>
           </Stack>
-        ) : renderJobDescription()}
+        ) : (
+          renderJobDescription()
+        )}
       </Container>
     </Box>
   );

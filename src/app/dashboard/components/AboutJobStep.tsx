@@ -179,6 +179,7 @@ import {
   Stack,
   TextField,
 } from '@mui/material';
+import { Add, AddOutlined } from '@mui/icons-material';
 import ReactQuill from 'react-quill';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -256,7 +257,7 @@ const AboutJobStep = ({ onNext, formData, setFormData }) => {
       <Stack spacing={1} minWidth={'280px'}>
         <Typography variant="subtitle1">Expectation</Typography>
         <Typography variant="body2" color="textSecondary">
-          What you're bringing to this role.
+          What you&rsquo;re bringing to this role.
         </Typography>
       </Stack>
       <Stack spacing={1} width={'100%'}>
@@ -278,7 +279,7 @@ const AboutJobStep = ({ onNext, formData, setFormData }) => {
           />
         ))}
         <Button
-          startIcon={<AddIcon />}
+          startIcon={<AddOutlined />}
           onClick={addExpectation}
           style={{ marginTop: '10px' }}
         >

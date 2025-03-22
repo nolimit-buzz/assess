@@ -31,6 +31,7 @@ import { useParams } from 'next/navigation';
 import { generateInput } from '../../../../utils/openai';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, TextField, IconButton } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { useTheme } from '@mui/material/styles';
 
 const Banner = styled(Box)(({ theme }) => ({
   width: '100%',
@@ -152,7 +153,7 @@ const TextEditor = ({ label, description, value, onChange, onRegenerate }) => {
   );
 };
 
-const Field = ({ label, description, value, onChange, multiline = false, customStyle = {} }) => {
+const Field = ({ label, description, value, onChange, multiline = false, customStyle = {}, error = '', placeholder = '' }) => {
   return (
     <>
       <Stack direction="row" spacing={3} alignItems="flex-start" padding="28px 24px">
@@ -187,6 +188,8 @@ const Field = ({ label, description, value, onChange, multiline = false, customS
           sx={{
             ...customStyle,
           }}
+          error={!!error}
+          placeholder={placeholder}
         />
       </Stack>
     </>
@@ -414,7 +417,7 @@ const AssessmentStep = ({ assessments, selectedAssessment, handleAssessmentChang
 const AboutTheJob = () => {
   const params = useParams();
   const jobId = params['job_id'];
-
+  const theme = useTheme()
   const steps = ['About the Job', 'Application Form', 'Assessment'];
 
   const [loading, setLoading] = useState(true);
@@ -427,7 +430,10 @@ const AboutTheJob = () => {
     description: '',
     responsibilities: '',
     expectations: [],
-    salary: '',
+    // salary: '',
+    salary_min: '',
+    salary_max: '',
+    salary_error: ''
   });
 
   const [formFields, setFormFields] = useState([]);
@@ -463,11 +469,15 @@ const AboutTheJob = () => {
           if (expectations[0] === '') expectations.shift();
           setFormData({
             ...jobData,
-            expectations: jobData.expectations.split(',') || [],
+            expectations: jobData.expectations.split('|||') || [],
             about_role: aiSuggestions.aboutTheRole || '',
             responsibilities: aiSuggestions.jobResponsibilities || '',
-            expectations: expectations || [],
+            // expectations: expectations || [],
             description: aiSuggestions.aboutTheRole || '',
+            // Prefill salary field with salary_min and salary_max
+            // salary: jobData.salary_min && jobData.salary_max ? `${jobData.salary_min}-${jobData.salary_max}` : '',
+            salary_min: jobData.salary_min || '',
+            salary_max: jobData.salary_max || ''
           })
           setFormFields(jobData.application_form.required_fields || []);
           setLoading(false);
@@ -476,7 +486,11 @@ const AboutTheJob = () => {
 
         setFormData({
           ...jobData,
-          expectations: jobData.expectations.split(',') || [],
+          expectations: jobData.expectations.split('|||') || [],
+          // Prefill salary field with salary_min and salary_max
+          // salary: jobData.salary_min && jobData.salary_max ? `${jobData.salary_min}-${jobData.salary_max}` : '',
+          salary_min: jobData.salary_min || '',
+          salary_max: jobData.salary_max || ''
         });
         setFormFields(jobData.application_form.required_fields || []);
 
@@ -503,7 +517,7 @@ const AboutTheJob = () => {
       const aiSuggestions = await generateInput({ jobTitle: formData.title, jobLevel: formData.level, field: field })
       setFormData(prevData => ({
         ...prevData,
-        [field === 'aboutTheRole' ? 'description' : field === 'jobResponsibilities' ? 'responsibilities' : 'expectations']: aiSuggestions[field] || prevData[field]
+        [field === 'aboutTheRole' ? 'about_role' : field === 'jobResponsibilities' ? 'responsibilities' : 'expectations']: aiSuggestions[field] || prevData[field]
       }));
     } catch (err) {
       console.error(`Error regenerating ${field}:`, err);
@@ -590,12 +604,61 @@ const AboutTheJob = () => {
     setSelectedAssessment(assessment);
   };
 
+  const validateSalaryRange = (value: string) => {
+    const salaryRegex = /^\d+(?:-\d+)?$/;
+    return salaryRegex.test(value);
+  };
+
+  const handleSalaryChange = (value: string) => {
+    // Remove any non-numeric characters except dash
+    const cleanValue = value.replace(/[^\d-]/g, '');
+    
+    // Only allow one dash
+    if (cleanValue.split('-').length > 2) {
+      return;
+    }
+
+    // Split the value into min and max
+    const [min, max] = cleanValue.split('-');
+
+    // Update the form data with both min and max values
+    setFormData(prev => ({
+      ...prev,
+      salary_min: min || '',
+      salary_max: max || '',
+      salary_error: ''
+    }));
+  };
+
+  const formatSalaryDisplay = (value: string) => {
+    if (!value) return '';
+    
+    const parts = value.split('-');
+    if (parts.length === 1) {
+      // Single number
+      const num = parseInt(parts[0]);
+      return isNaN(num) ? value : num.toLocaleString();
+    } else {
+      // Range
+      const min = parseInt(parts[0]);
+      const max = parseInt(parts[1]);
+      if (isNaN(min) || isNaN(max)) {
+        return value;
+      }
+      return `${min.toLocaleString()}-${max.toLocaleString()}`;
+    }
+  };
+
   const handleDone = async () => {
     // Collate all the data
     const collatedData = {
       ...formData,
       application_form: formFields,
-      selectedAssessment
+      selectedAssessment,
+      expectations: formData.expectations.join('|||'),
+      // Convert salary strings to numbers, removing any commas
+      salary_min: parseInt(formData.salary_min.replace(/,/g, '')) || 0,
+      salary_max: parseInt(formData.salary_max.replace(/,/g, '')) || 0
     };
 
     console.log("Updating job post...", collatedData);
@@ -610,19 +673,19 @@ const AboutTheJob = () => {
 
       const response = await axios.put(
         `https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${jobId}`,
-        {...collatedData,job_type: "fulltime",
+        {
+          ...collatedData,
+          job_type: "fulltime",
           availability: "week",
           skills: "php,css",
           experience_years: "5 years",
-          qualifications:'Senior',
+          qualifications: 'Senior',
           current_role: "jnr dev",
           work_preference: "remote",
-          salary_range: "100-200",
           start_date: "immediately",
           address: "34 Ellasan",
-          salary_min:'2000',
-          salary_max:'30000',
-          github_profile: "https://www.linkedin.com"},
+          github_profile: "https://www.linkedin.com"
+        },
         {
           headers: {
             "Content-Type": "application/json",
@@ -737,7 +800,7 @@ const AboutTheJob = () => {
                   lineHeight: '100%',
                   letterSpacing: '0.16px',
                 }} variant="body2" color="textSecondary">
-                  What you're bringing to this role.
+                  What you&rsquo;re bringing to this role.
                 </Typography>
                 <IconButton size="small" onClick={handleRegenerate('expectations')}>
                   <RefreshIcon />
@@ -779,10 +842,12 @@ const AboutTheJob = () => {
             </Stack>
             <Divider />
             <Field
-              label="Salary"
-              description="Add numeration."
-              value={formData.salary}
-              onChange={(e) => handleChange('salary')(e.target.value)}
+              label="Salary Range"
+              description="Add numeration"
+              value={formatSalaryDisplay(`${formData.salary_min}-${formData.salary_max}`)}
+              onChange={(e) => handleSalaryChange(e.target.value)}
+              error={formData.salary_error}
+              placeholder="50,000-100,000"
               customStyle={{
                 '& .MuiInputBase-root': {
                   '& fieldset': {
@@ -835,7 +900,7 @@ const AboutTheJob = () => {
     <PageContainer>
       <Banner sx={{
         width: "100%",
-        backgroundColor: "#032B44",
+        backgroundColor: theme.palette.primary.main,
         backgroundImage: "url(/images/backgrounds/banner-bg.svg)",
         backgroundSize: "cover",
         backgroundPosition: "center",

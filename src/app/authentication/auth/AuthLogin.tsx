@@ -6,7 +6,13 @@ import Link from "next/link";
 import CustomTextField from "@/app/dashboard/components/forms/theme-elements/CustomTextField";
 import axios from "axios";
 
-const AuthLogin = ({ title, subtitle, subtext }) => {
+interface AuthLoginProps {
+  title?: string;
+  subtitle?: string;
+  subtext?: string;
+}
+
+const AuthLogin: React.FC<AuthLoginProps> = ({ title, subtitle, subtext }) => {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
@@ -22,7 +28,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
   }, [router]);
 
   // Handle input change
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
   };
@@ -54,7 +60,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage("");
 
@@ -74,7 +80,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
       router.push("/dashboard"); // Redirect to dashboard after login
 
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || "Login failed. Please try again.");
+      setErrorMessage((error as any).response?.data?.message || "Login failed. Please try again.");
     }
     setLoading(false);
   };
@@ -94,7 +100,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
       )}
 
       <Stack spacing={3}>
-        <CustomTextField label="Email" name="email" placeholder="Enter your email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email} />
+        <CustomTextField label="Email" name="email" placeholder="Enter your email" type="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email} />
         <CustomTextField label="Password" name="password" placeholder="Enter your password" type="password" value={formData.password} onChange={handleChange} error={!!errors.password} helperText={errors.password} />
 
         {errorMessage && <Alert severity="error">{errorMessage}</Alert>}

@@ -15,10 +15,11 @@ import {
     styled,
     Chip,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 const Banner = styled(Box)(({ theme }) => ({
     width: "100%",
-    background: "#4444E2",
+    background: theme.palette.primary.main,
     color: "#fff",
     display: "flex",
     flexDirection: "column",
@@ -35,6 +36,7 @@ const Pill = styled(Chip)(({ theme }) => ({
 }));
 
 const JobDetailsPage = () => {
+    const theme = useTheme()
     const { job_id } = useParams();
     const router = useRouter();
     const [jobData, setJobData] = useState(null);
@@ -153,7 +155,7 @@ const JobDetailsPage = () => {
         <>
             <Banner
                 sx={{
-                    backgroundColor: "#4444E2",
+                    backgroundColor: theme.palette.primary.main,
                     backgroundImage: "url(/images/backgrounds/banner-bg.svg)",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
