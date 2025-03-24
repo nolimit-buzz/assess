@@ -1,11 +1,32 @@
 "use client";
 import Link from "next/link";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography, Container, styled, Chip } from "@mui/material";
 import PageContainer from "@/app/dashboard/components/container/PageContainer";
 import AuthLogin from "./authentication/auth/AuthLogin";
 import Image from "next/image";
+import { useTheme } from '@mui/material/styles';
+
+const Banner = styled(Box)(({ theme }) => ({
+  width: '100%',
+  background: theme.palette.primary.main,
+  color: '#fff',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  marginBottom: '28px',
+}));
+
+const Pill = styled(Chip)(({ theme }) => ({
+  padding: '10px 12px',
+  backgroundColor: 'rgba(255, 255, 255, 0.12)',
+  border: '1px solid rgba(255, 255, 255, 0.08)',
+  borderRadius: '20px',
+  color: '#fff',
+}));
 
 const Login = () => {
+  const theme = useTheme();
+
   return (
     <PageContainer title="Login" description="This is the login page">
       <Stack direction="row" width="100%" height={'100vh'} backgroundColor="white">

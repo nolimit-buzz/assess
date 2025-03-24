@@ -213,7 +213,19 @@ const JobDetailsPage = () => {
                                 fullWidth
                                 required={field.required}
                                 onChange={handleChange}
-                                sx={{ mb: 2 }}
+                                sx={{ mb: 2, '& label':{color:theme.palette.grey[100]} }}
+                            />
+                        ))}
+                         {jobData.application_form?.custom_fields.map((field) => (
+                            <TextField
+                                key={field.key}
+                                name={field.key}
+                                label={field.label !== "CV" ? field.label : null}
+                                type={field.type}
+                                fullWidth
+                                required={field.required}
+                                onChange={handleChange}
+                                sx={{ mb: 2, '& label':{color:theme.palette.grey[100]} }}
                             />
                         ))}
                         <Button type="submit" variant="contained" color="primary" fullWidth>

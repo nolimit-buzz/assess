@@ -1,4 +1,4 @@
-'use client';
+   'use client';
 import React, { useState, useEffect } from 'react';
 import {
   Container,
@@ -111,13 +111,14 @@ const StyledOutlineButton = styled(Button)(({ theme }) => ({
 }));
 
 const TextEditor = ({ label, description, value, onChange, onRegenerate }) => {
+  const theme = useTheme();
   return (
     <>
       <Stack direction="row" spacing={3} alignItems="flex-start" width={'100%'} padding="28px 24px">
         <Stack spacing={1} minWidth={'280px'}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <Typography variant="subtitle1" sx={{
-              color: 'rgba(17, 17, 17, 0.92)',
+              color: theme.palette.grey[100],
               fontSize: '20px',
               fontStyle: 'normal',
               fontWeight: 600,
@@ -129,7 +130,7 @@ const TextEditor = ({ label, description, value, onChange, onRegenerate }) => {
             </IconButton>
           </Stack>
           <Typography sx={{
-            color: 'rgba(17, 17, 17, 0.68)',
+            color: theme.palette.grey[100],
             fontSize: '16px',
             fontStyle: 'normal',
             fontWeight: 400,
@@ -154,12 +155,13 @@ const TextEditor = ({ label, description, value, onChange, onRegenerate }) => {
 };
 
 const Field = ({ label, description, value, onChange, multiline = false, customStyle = {}, error = '', placeholder = '' }) => {
+  const theme = useTheme();
   return (
     <>
       <Stack direction="row" spacing={3} alignItems="flex-start" padding="28px 24px">
         <Stack spacing={1} minWidth={'280px'}>
           <Typography variant="subtitle1" sx={{
-            color: 'rgba(17, 17, 17, 0.92)',
+            color: theme.palette.grey[100],
             fontSize: '20px',
             fontStyle: 'normal',
             fontWeight: 600,
@@ -167,7 +169,7 @@ const Field = ({ label, description, value, onChange, multiline = false, customS
             letterSpacing: '0.1px',
           }}>{label}</Typography>
           <Typography sx={{
-            color: 'rgba(17, 17, 17, 0.68)',
+            color: theme.palette.grey[100],
             fontSize: '16px',
             fontStyle: 'normal',
             fontWeight: 400,
@@ -196,7 +198,9 @@ const Field = ({ label, description, value, onChange, multiline = false, customS
   );
 };
 
-const FormBuilderField = ({ field, index, handleChange, handleDelete, handleTypeChange }) => {
+const FormBuilderField = ({ field, index, handleChange, handleDelete, handleTypeChange, isRequired }) => {
+  const theme = useTheme();
+
   return (
     <Stack alignItems="flex-start" width={'100%'} sx={{ padding: '20px 22px', border: '1px solid rgba(17, 17, 17, 0.14)', borderRadius: '8px' }}>
       <Stack direction='row' spacing={1} width={'100%'}>
@@ -206,18 +210,19 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
             value={field.label}
             onChange={(e) => handleChange(index, 'label', e.target.value)}
             variant="outlined"
+            disabled={isRequired}
             sx={{
               width: '100%',
               '& .MuiInputBase-root': {
                 '& input': {
                   fontSize: '16px !important',
-                  color: 'rgba(17, 17, 17, 0.92)',
+                  color: theme.palette.grey[100],
                   fontWeight: 500,
                   lineHeight: '100%',
                   letterSpacing: '0.16px',
                   border: 'none',
-                  '&:placeholder': {
-                    color: 'rgba(17, 17, 17, 0.48)',
+                  '&::placeholder': {
+                    color: theme.palette.grey[100],
                   }
                 },
                 '& fieldset': {
@@ -226,43 +231,45 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
               }
             }}
           />
-          <Stack direction={'row'} gap={2} alignItems={'center'}>
-            <FormControl variant="outlined" style={{ minWidth: 150 }}>
-              <Select
-                value={field.type}
-                onChange={(e) => handleTypeChange(index, e.target.value)}
-                sx={{
-                  '& .MuiSelect-select': {
-                    padding: '5px 8px',
-                    paddingRight: '10px',
-                    borderRadius: '5px',
-                    backgroundColor: '#F4F4F6',
-                    color: 'rgba(17, 17, 17, 0.84)',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    letterSpacing: '0.14px',
-                    '& div': {
-                      paddingRight: 0,
-                    },
-                    '& fieldset': {
-                      border: 'none',
+          {!isRequired && (
+            <Stack direction={'row'} gap={2} alignItems={'center'}>
+              <FormControl variant="outlined" style={{ minWidth: 150 }}>
+                <Select
+                  value={field.type}
+                  onChange={(e) => handleTypeChange(index, e.target.value)}
+                  sx={{
+                    '& .MuiSelect-select': {
+                      padding: '5px 8px',
+                      paddingRight: '10px',
+                      borderRadius: '5px',
+                      backgroundColor: '#F4F4F6',
+                      color: 'rgba(17, 17, 17, 0.84)',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      letterSpacing: '0.14px',
+                      '& div': {
+                        paddingRight: 0,
+                      },
+                      '& fieldset': {
+                        border: 'none',
+                      }
                     }
-                  }
-                }}
-              >
-                <MenuItem value="text">Open Question</MenuItem>
-                <MenuItem value="select">Multi Choice</MenuItem>
-                <MenuItem value="file">Attachment</MenuItem>
-              </Select>
-            </FormControl>
-            <svg onClick={() => handleDelete(index)} cursor={'pointer'} width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17.5 4.98332C14.725 4.70832 11.9333 4.56665 9.15 4.56665C7.5 4.56665 5.85 4.64998 4.2 4.81665L2.5 4.98332" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M7.08301 4.14175L7.26634 3.05008C7.39967 2.25841 7.49967 1.66675 8.90801 1.66675H11.0913C12.4997 1.66675 12.608 2.29175 12.733 3.05841L12.9163 4.14175" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M15.7087 7.6167L15.167 16.0084C15.0753 17.3167 15.0003 18.3334 12.6753 18.3334H7.32533C5.00033 18.3334 4.92533 17.3167 4.83366 16.0084L4.29199 7.6167" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M8.6084 13.75H11.3834" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M7.91699 10.4167H12.0837" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </Stack>
+                  }}
+                >
+                  <MenuItem value="text">Open Question</MenuItem>
+                  <MenuItem value="select">Multi Choice</MenuItem>
+                  <MenuItem value="file">Attachment</MenuItem>
+                </Select>
+              </FormControl>
+              <svg onClick={() => handleDelete(index)} cursor={'pointer'} width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.5 4.98332C14.725 4.70832 11.9333 4.56665 9.15 4.56665C7.5 4.56665 5.85 4.64998 4.2 4.81665L2.5 4.98332" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M7.08301 4.14175L7.26634 3.05008C7.39967 2.25841 7.49967 1.66675 8.90801 1.66675H11.0913C12.4997 1.66675 12.608 2.29175 12.733 3.05841L12.9163 4.14175" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M15.7087 7.6167L15.167 16.0084C15.0753 17.3167 15.0003 18.3334 12.6753 18.3334H7.32533C5.00033 18.3334 4.92533 17.3167 4.83366 16.0084L4.29199 7.6167" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M8.6084 13.75H11.3834" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M7.91699 10.4167H12.0837" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </Stack>
+          )}
         </Stack>
       </Stack>
       {field.type === 'text' && (
@@ -272,7 +279,7 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
           onChange={(e) => handleChange(index, 'value', e.target.value)}
           variant="outlined"
           InputProps={{
-            readOnly: true,
+            readOnly: isRequired,
             autoFocus: true,
           }}
           placeholder="Response field"
@@ -287,9 +294,9 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
                 width: '100%',
                 borderRadius: '5px',
                 backgroundColor: '#F4F4F6',
-                color: 'rgba(17, 17, 17, 0.84)',
-                '&:placeholder': {
-                  color: 'rgba(17, 17, 17, 0.48)',
+                color: theme.palette.grey[100],
+                '&::placeholder': {
+                  color: theme.palette.grey[100],
                 }
               },
               '& fieldset': {
@@ -309,6 +316,7 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
                 onChange={(e) => handleChange(index, 'options', e.target.value, idx)}
                 variant="outlined"
                 placeholder={`Enter option ${idx + 1}`}
+                disabled={isRequired}
                 sx={{
                   width: '100%',
                   '& .MuiInputBase-root': {
@@ -319,8 +327,9 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
                     border: "0.5px solid rgba(17, 17, 17, 0.08)",
                     '& input': {
                       width: '100%',
-                      '&:placeholder': {
-                        color: 'rgba(17, 17, 17, 0.48)',
+                      color: theme.palette.grey[100],
+                      '&::placeholder': {
+                        color: theme.palette.grey[100],
                       }
                     },
                     '& fieldset': {
@@ -330,24 +339,28 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
                   }
                 }}
               />
-              <IconButton size="small" onClick={() => handleDelete(index, idx)}>
-                <svg cursor={'pointer'} width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M17.5 4.98332C14.725 4.70832 11.9333 4.56665 9.15 4.56665C7.5 4.56665 5.85 4.64998 4.2 4.81665L2.5 4.98332" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M7.08301 4.14175L7.26634 3.05008C7.39967 2.25841 7.49967 1.66675 8.90801 1.66675H11.0913C12.4997 1.66675 12.608 2.29175 12.733 3.05841L12.9163 4.14175" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M15.7087 7.6167L15.167 16.0084C15.0753 17.3167 15.0003 18.3334 12.6753 18.3334H7.32533C5.00033 18.3334 4.92533 17.3167 4.83366 16.0084L4.29199 7.6167" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M8.6084 13.75H11.3834" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M7.91699 10.4167H12.0837" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </IconButton>
+              {!isRequired && (
+                <IconButton size="small" onClick={() => handleDelete(index, idx)}>
+                  <svg cursor={'pointer'} width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.5 4.98332C14.725 4.70832 11.9333 4.56665 9.15 4.56665C7.5 4.56665 5.85 4.64998 4.2 4.81665L2.5 4.98332" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M7.08301 4.14175L7.26634 3.05008C7.39967 2.25841 7.49967 1.66675 8.90801 1.66675H11.0913C12.4997 1.66675 12.608 2.29175 12.733 3.05841L12.9163 4.14175" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M15.7087 7.6167L15.167 16.0084C15.0753 17.3167 15.0003 18.3334 12.6753 18.3334H7.32533C5.00033 18.3334 4.92533 17.3167 4.83366 16.0084L4.29199 7.6167" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M8.6084 13.75H11.3834" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M7.91699 10.4167H12.0837" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </IconButton>
+              )}
             </Stack>
           ))}
-          <Button
-            startIcon={<AddIcon />}
-            onClick={() => handleChange(index, 'addOption')}
-            style={{ marginTop: '10px' }}
-          >
-            Add Option
-          </Button>
+          {!isRequired && (
+            <Button
+              startIcon={<AddIcon />}
+              onClick={() => handleChange(index, 'addOption')}
+              style={{ marginTop: '10px' }}
+            >
+              Add Option
+            </Button>
+          )}
         </Stack>
       )}
       {field.type === 'file' && (
@@ -358,7 +371,7 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
           variant="outlined"
           placeholder="Attach file"
           InputProps={{
-            readOnly: true,
+            readOnly: isRequired,
             autoFocus: true,
             startAdornment: (
               <InputAdornment position="start">
@@ -374,7 +387,10 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
               borderRadius: '6px',
               border: "0.5px solid rgba(17, 17, 17, 0.08)",
               '& input': {
-                color: 'rgba(17, 17, 17, 0.84)',
+                color: theme.palette.grey[100],
+                '&::placeholder': {
+                  color: theme.palette.grey[100],
+                }
               },
               '& fieldset': {
                 border: 'none',
@@ -437,6 +453,7 @@ const AboutTheJob = () => {
   });
 
   const [formFields, setFormFields] = useState([]);
+  const [customFields, setCustomFields] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedAssessment, setSelectedAssessment] = useState('');
   const [showDialog, setShowDialog] = useState(false);
@@ -472,10 +489,7 @@ const AboutTheJob = () => {
             expectations: jobData.expectations.split('|||') || [],
             about_role: aiSuggestions.aboutTheRole || '',
             responsibilities: aiSuggestions.jobResponsibilities || '',
-            // expectations: expectations || [],
             description: aiSuggestions.aboutTheRole || '',
-            // Prefill salary field with salary_min and salary_max
-            // salary: jobData.salary_min && jobData.salary_max ? `${jobData.salary_min}-${jobData.salary_max}` : '',
             salary_min: jobData.salary_min || '',
             salary_max: jobData.salary_max || ''
           })
@@ -487,8 +501,6 @@ const AboutTheJob = () => {
         setFormData({
           ...jobData,
           expectations: jobData.expectations.split('|||') || [],
-          // Prefill salary field with salary_min and salary_max
-          // salary: jobData.salary_min && jobData.salary_max ? `${jobData.salary_min}-${jobData.salary_max}` : '',
           salary_min: jobData.salary_min || '',
           salary_max: jobData.salary_max || ''
         });
@@ -532,9 +544,10 @@ const AboutTheJob = () => {
   };
 
   const addField = (type = 'text') => {
-    setFormFields([
-      ...formFields,
+    setCustomFields([
+      ...customFields,
       {
+        key: `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         type,
         label: '',
         description: '',
@@ -545,7 +558,7 @@ const AboutTheJob = () => {
   };
 
   const handleFieldChange = (index, key, value, optionIndex = null) => {
-    setFormFields((prevFields) =>
+    setCustomFields((prevFields) =>
       prevFields.map((field, idx) => {
         if (idx === index) {
           if (key === 'options' && optionIndex !== null) {
@@ -568,7 +581,7 @@ const AboutTheJob = () => {
   };
 
   const handleTypeChange = (index, type) => {
-    setFormFields((prevFields) =>
+    setCustomFields((prevFields) =>
       prevFields.map((field, idx) => {
         if (idx === index) {
           field.type = type;
@@ -584,7 +597,7 @@ const AboutTheJob = () => {
   };
 
   const handleDeleteField = (index, optionIndex = null) => {
-    setFormFields((prevFields) =>
+    setCustomFields((prevFields) =>
       prevFields.map((field, idx) => {
         if (idx === index) {
           if (optionIndex !== null) {
@@ -653,10 +666,16 @@ const AboutTheJob = () => {
     // Collate all the data
     const collatedData = {
       ...formData,
-      application_form: formFields,
+      custom_fields: customFields.map(field => ({
+        key: field.key,
+        type: field.type,
+        label: field.label,
+        description: field.description,
+        value: field.value,
+        options: field.options
+      })),
       selectedAssessment,
       expectations: formData.expectations.join('|||'),
-      // Convert salary strings to numbers, removing any commas
       salary_min: parseInt(formData.salary_min.replace(/,/g, '')) || 0,
       salary_max: parseInt(formData.salary_max.replace(/,/g, '')) || 0
     };
@@ -862,14 +881,29 @@ const AboutTheJob = () => {
       case 2:
         return (
           <Stack padding="28px" gap={'12px'}>
+            {/* Display required fields */}
             {formFields.map((field, index) => (
               <FormBuilderField
-                key={index}
+                key={`required-${index}`}
                 field={field.type === 'email' || field.type === 'url' ? { ...field, type: 'text' } : field}
                 index={index}
                 handleChange={handleFieldChange}
                 handleDelete={handleDeleteField}
                 handleTypeChange={handleTypeChange}
+                isRequired={true}
+              />
+            ))}
+            
+            {/* Display custom fields */}
+            {customFields.map((field, index) => (
+              <FormBuilderField
+                key={field.key}
+                field={field.type === 'email' || field.type === 'url' ? { ...field, type: 'text' } : field}
+                index={index}
+                handleChange={handleFieldChange}
+                handleDelete={handleDeleteField}
+                handleTypeChange={handleTypeChange}
+                isRequired={false}
               />
             ))}
 

@@ -24,6 +24,7 @@ import BlockIcon from "@mui/icons-material/Block";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import { PHASE_OPTIONS } from "@/app/constants/phaseOptions";
+import { useRouter } from "next/navigation";
 
 interface PhaseOption {
   label: string;
@@ -55,6 +56,7 @@ export default function CandidateListSection({
   disableSelection,
   currentStage,
 }: CandidateListSectionProps) {
+  const router = useRouter();
   console.log(candidate); // Skills data for mapping
   const skills = candidate?.professional_info?.skills?.split(",");
 
@@ -88,21 +90,43 @@ export default function CandidateListSection({
   };
 
   const handleAction = (action: string) => {
-    onUpdateStages(action, [candidate.id]); // Pass single candidate id
+    onUpdateStages(action, [candidate.id]);
     handleClose();
+  };
+
+  const handleCardClick = (event: React.MouseEvent<HTMLElement>) => {
+    // Prevent redirection if clicking on checkbox or quick actions button
+    if (
+      (event.target as HTMLElement).closest('.checkbox-container') ||
+      (event.target as HTMLElement).closest('.quick-actions-button')
+    ) {
+      return;
+    }
+    
+    // Get the job_id from the URL
+    const pathParts = window.location.pathname.split('/');
+    const jobId = pathParts[pathParts.length - 2];
+    
+    // Navigate to the applicant details page
+    router.push(`/dashboard/job-posting/${jobId}/submissions/${candidate.id}`);
   };
 
   return (
     <Paper
       elevation={0}
+      onClick={handleCardClick}
       sx={{
         display: "flex",
         alignItems: "flex-start",
         p: 2,
         borderBottom: "0.8px solid rgba(17, 17, 17, 0.08)",
+        cursor: "pointer",
+        "&:hover": {
+          backgroundColor: "rgba(0, 0, 0, 0.02)",
+        }
       }}
     >
-      <Box sx={{ p: 0 }}>
+      <Box sx={{ p: 0 }} className="checkbox-container">
         <Checkbox
           sx={{ p: 0 }}
           onChange={() => onSelectCandidate(candidate.id)}
@@ -232,15 +256,16 @@ export default function CandidateListSection({
           variant="outlined"
           onClick={handleClick}
           endIcon={<ChevronDownIcon />}
+          className="quick-actions-button"
           sx={{
             position: "absolute",
             right: 16,
             top: 16,
             textTransform: "none",
-            borderColor: "divider",
-            color: "text.secondary",
+            borderColor: "grey[100]",
+            color: "grey[100]",
             "&:hover": {
-              borderColor: "primary.main",
+              borderColor: "grey[200]",
               backgroundColor: "transparent",
             },
           }}

@@ -55,6 +55,53 @@ import BlockIcon from "@mui/icons-material/Block";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import { PHASE_OPTIONS } from "@/app/constants/phaseOptions";
+import { styled } from "@mui/material/styles";
+import CreatableSelect from 'react-select/creatable';
+import { getSkillsForRole, Skill } from '@/utils/skills';
+
+const StyledSelect = styled(Select)({
+  '& .MuiSelect-select': {
+    backgroundColor: '#fff',
+    borderRadius: '12px',
+    border: '1px solid rgba(17, 17, 17, 0.08)',
+    padding: '16px',
+    color: 'rgba(17, 17, 17, 0.84)',
+    '&:focus': {
+      backgroundColor: '#fff',
+    }
+  }
+});
+
+const StyledTextField = styled(TextField)({
+  '& .MuiOutlinedInput-root': {
+    backgroundColor: '#fff',
+    borderRadius: '12px',
+    border: '1px solid rgba(17, 17, 17, 0.08)',
+    '& fieldset': {
+      border: 'none',
+    },
+    '&:hover fieldset': {
+      border: 'none',
+    },
+    '&.Mui-focused fieldset': {
+      border: 'none',
+    }
+  },
+  '& .MuiInputBase-input': {
+    padding: '16px',
+    color: 'rgba(17, 17, 17, 0.84)',
+    '&::placeholder': {
+      color: 'rgba(17, 17, 17, 0.48)',
+    }
+  }
+});
+
+const StyledRadio = styled(Radio)({
+  color: 'rgba(17, 17, 17, 0.6)',
+  '&.Mui-checked': {
+    color: '#4444E2',
+  }
+});
 
 export default function Home() {
   const theme = useTheme();
@@ -62,11 +109,12 @@ export default function Home() {
   const [subTabValue, setSubTabValue] = useState(0);
   const [filterMenuAnchor, setFilterMenuAnchor] = useState(null);
   const [quickActionsAnchor, setQuickActionsAnchor] = useState(null);
+  const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
   const [filters, setFilters] = useState({
     yearsOfExperience: "",
     salaryMin: "",
     salaryMax: "",
-    requiredSkills: "",
+    requiredSkills: [],
     availability: "",
     trial: "",
   });
@@ -86,35 +134,35 @@ export default function Home() {
 
   useEffect(() => {
     const fetchJobDetails = async () => {
-      if (primaryTabValue === 1) {
-        setLoading(true);
-        setError(null);
-        try {
-          const token = localStorage.getItem("jwt");
-          const jobId = getJobId();
-          const response = await fetch(
-            `https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${jobId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
+      // if (primaryTabValue === 1) {
+      setLoading(true);
+      setError(null);
+      try {
+        const token = localStorage.getItem("jwt");
+        const jobId = getJobId();
+        const response = await fetch(
+          `https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${jobId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
-          );
+          },
+        );
 
-          if (!response.ok) {
-            throw new Error(`Failed to fetch job details: ${response.status}`);
-          }
-
-          const data = await response.json();
-          setJobDetails(data);
-        } catch (err) {
-          console.error("Error fetching job details:", err);
-          setError(err.message);
-        } finally {
-          setLoading(false);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch job details: ${response.status}`);
         }
+
+        const data = await response.json();
+        setJobDetails(data);
+      } catch (err) {
+        console.error("Error fetching job details:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
+      // }
     };
 
     fetchJobDetails();
@@ -158,6 +206,21 @@ export default function Home() {
     }
   }, [primaryTabValue, subTabValue, params]);
 
+  useEffect(() => {
+    console.log('Job details received:', jobDetails);
+    const loadSkills = async () => {
+
+      if (jobDetails) {
+        const skills = await getSkillsForRole(jobDetails.title, jobDetails.about_role);
+        setAvailableSkills(skills);
+      }
+    };
+
+    if (jobDetails) {
+      loadSkills();
+    }
+  }, [jobDetails]);
+
   const getStageValue = (tabValue) => {
     switch (tabValue) {
       case 1:
@@ -187,7 +250,7 @@ export default function Home() {
       const token = localStorage.getItem("jwt");
       const jobId = getJobId();
       const stage = subTabValue === 0 ? "new" : getStageValue(subTabValue);
-      
+
       // Build query parameters from filters
       const queryParams = new URLSearchParams();
       if (filters.yearsOfExperience) {
@@ -199,7 +262,9 @@ export default function Home() {
       }
       if (filters.salaryMin) queryParams.append("min_salary", filters.salaryMin);
       if (filters.salaryMax) queryParams.append("max_salary", filters.salaryMax);
-      if (filters.requiredSkills) queryParams.append("skills", filters.requiredSkills);
+      if (filters.requiredSkills.length > 0) {
+        queryParams.append("skills", filters.requiredSkills.join(','));
+      }
       if (filters.availability) queryParams.append("availability", filters.availability);
       if (filters.trial) queryParams.append("trial", filters.trial);
       queryParams.append("stage", stage);
@@ -234,7 +299,7 @@ export default function Home() {
       yearsOfExperience: "",
       salaryMin: "",
       salaryMax: "",
-      requiredSkills: "",
+      requiredSkills: [],
       availability: "",
       trial: "",
     });
@@ -493,7 +558,7 @@ export default function Home() {
             >
               About the Role
             </Typography>
-            <Typography
+            <Box
               dangerouslySetInnerHTML={{ __html: jobData?.about_role }}
               variant="body1"
               sx={{
@@ -502,7 +567,7 @@ export default function Home() {
                 letterSpacing: "0.16px",
                 lineHeight: "24px",
               }}
-            ></Typography>
+            ></Box>
           </Box>
 
           <Divider sx={{ my: 3 }} />
@@ -635,6 +700,17 @@ export default function Home() {
     }
   };
 
+  const hasActiveFilters = () => {
+    return (
+      filters.yearsOfExperience !== "" ||
+      filters.salaryMin !== "" ||
+      filters.salaryMax !== "" ||
+      filters.requiredSkills.length > 0 ||
+      filters.availability !== "" ||
+      filters.trial !== ""
+    );
+  };
+
   return (
     <Box
       sx={{
@@ -665,7 +741,13 @@ export default function Home() {
             <IconButton sx={{ mr: 1 }} aria-label="back">
               <ArrowBackIcon />
             </IconButton>
-            <Typography variant="h5" component="h1" fontWeight="bold">
+            <Typography variant="h5" component="h1" fontWeight="bold" sx={{
+              color: theme.palette.grey[100],
+              fontSize: "24px",
+              fontWeight: 600,
+              lineHeight: "100%", 
+              letterSpacing: "0.12px"
+            }}  >
               {jobDetails?.title}
             </Typography>
           </Box>
@@ -720,19 +802,33 @@ export default function Home() {
         {primaryTabValue === 0 ? (
           <Stack direction="row" gap={3}>
             <Box sx={{ width: 300, flexShrink: 0 }}>
-              <Paper sx={{ p: 3, mb: 2, borderRadius: 2 }}>
+              <Paper elevation={0} sx={{ p: 3, mb: 2, borderRadius: 2 }}>
                 <Box
                   sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 2,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 3
                   }}
                 >
-                  <Typography variant="h6">Filters:</Typography>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontSize: '20px',
+                      fontWeight: 600,
+                      color: 'rgba(17, 17, 17, 0.92)'
+                    }}
+                  >
+                    Filters:
+                  </Typography>
                   <Button
                     startIcon={<CloseIcon />}
-                    sx={{ color: "#757575", textTransform: "none" }}
+                    sx={{
+                      color: 'rgba(17, 17, 17, 0.72)',
+                      textTransform: 'none',
+                      fontSize: '14px',
+                      fontWeight: 400
+                    }}
                     onClick={clearFilters}
                   >
                     Clear filter
@@ -740,7 +836,14 @@ export default function Home() {
                 </Box>
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  <Typography
+                    sx={{
+                      mb: 1.5,
+                      fontSize: '16px',
+                      fontWeight: 500,
+                      color: 'rgba(17, 17, 17, 0.92)'
+                    }}
+                  >
                     Years of experience
                   </Typography>
                   <FormControl fullWidth>
@@ -748,11 +851,16 @@ export default function Home() {
                       value={filters.yearsOfExperience}
                       displayEmpty
                       renderValue={(selected) => selected || "Select years"}
-                      sx={{ borderRadius: 1 }}
-                      endAdornment={<KeyboardArrowDownIcon />}
-                      onChange={(e) =>
-                        handleFilterChange("yearsOfExperience", e.target.value)
-                      }
+                      sx={{
+                        backgroundColor: '#fff',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(17, 17, 17, 0.08)',
+                        '& .MuiSelect-select': {
+                          padding: '16px',
+                          color: filters.yearsOfExperience ? 'rgba(17, 17, 17, 0.84)' : 'rgba(17, 17, 17, 0.48)'
+                        }
+                      }}
+                      onChange={(e) => handleFilterChange("yearsOfExperience", e.target.value)}
                     >
                       <MenuItem value="">All years</MenuItem>
                       <MenuItem value="1-3">1-3 years</MenuItem>
@@ -763,111 +871,169 @@ export default function Home() {
                 </Box>
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  <Typography
+                    sx={{
+                      mb: 1.5,
+                      fontSize: '16px',
+                      fontWeight: 500,
+                      color: 'rgba(17, 17, 17, 0.92)'
+                    }}
+                  >
                     Salary expectation:
                   </Typography>
-                  <TextField
-                    placeholder="Min: 000000"
-                    fullWidth
-                    sx={{ mb: 1, borderRadius: 1 }}
-                    value={filters.salaryMin}
-                    onChange={(e) =>
-                      handleFilterChange("salaryMin", e.target.value)
-                    }
-                    type="number"
-                  />
-                  <TextField
-                    placeholder="Max: 000000"
-                    fullWidth
-                    sx={{ borderRadius: 1 }}
-                    value={filters.salaryMax}
-                    onChange={(e) =>
-                      handleFilterChange("salaryMax", e.target.value)
-                    }
-                    type="number"
-                  />
+                  <Stack spacing={1.5}>
+                    <StyledTextField
+                      placeholder="Min: 000000"
+                      fullWidth
+                      value={filters.salaryMin}
+                      onChange={(e) => handleFilterChange("salaryMin", e.target.value)}
+                      type="number"
+                    />
+                    <StyledTextField
+                      placeholder="Max: 000000"
+                      fullWidth
+                      value={filters.salaryMax}
+                      onChange={(e) => handleFilterChange("salaryMax", e.target.value)}
+                      type="number"
+                    />
+                  </Stack>
                 </Box>
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  <Typography
+                    sx={{
+                      mb: 1.5,
+                      fontSize: '16px',
+                      fontWeight: 500,
+                      color: 'rgba(17, 17, 17, 0.92)'
+                    }}
+                  >
                     Required skills
                   </Typography>
-                  <FormControl fullWidth>
-                    <Select
-                      value={filters.requiredSkills}
-                      displayEmpty
-                      renderValue={(selected) => selected || "Select skills"}
-                      sx={{ borderRadius: 1 }}
-                      endAdornment={<KeyboardArrowDownIcon />}
-                      onChange={(e) =>
-                        handleFilterChange("requiredSkills", e.target.value)
-                      }
-                    >
-                      <MenuItem value="">All skills</MenuItem>
-                      <MenuItem value="Communication">Communication</MenuItem>
-                      <MenuItem value="Data analysis">Data analysis</MenuItem>
-                      <MenuItem value="Strategic Thinking">
-                        Strategic Thinking
-                      </MenuItem>
-                      <MenuItem value="Empathy">Empathy</MenuItem>
-                      <MenuItem value="Prioritization">Prioritization</MenuItem>
-                      <MenuItem value="Research">Research</MenuItem>
-                    </Select>
-                  </FormControl>
+                  <CreatableSelect
+                    isMulti
+                    options={availableSkills}
+                    value={filters.requiredSkills.map(skill => ({ value: skill, label: skill }))}
+                    onChange={(selectedOptions: any) => {
+                      const selectedSkills = selectedOptions ? selectedOptions.map((option: any) => option.value) : [];
+                      handleFilterChange("requiredSkills", selectedSkills);
+                    }}
+                    onCreateOption={(inputValue: string) => {
+                      const newSkill = { value: inputValue, label: inputValue };
+                      handleFilterChange("requiredSkills", [...filters.requiredSkills, inputValue]);
+                    }}
+                    placeholder="Select or create skills"
+                    formatCreateLabel={(inputValue: string) => `Create "${inputValue}"`}
+                    styles={{
+                      control: (base: any) => ({
+                        ...base,
+                        backgroundColor: '#fff',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(17, 17, 17, 0.08)',
+                        minHeight: '52px',
+                        boxShadow: 'none',
+                        '&:hover': {
+                          borderColor: 'rgba(17, 17, 17, 0.08)'
+                        }
+                      }),
+                      menu: (base: any) => ({
+                        ...base,
+                        zIndex: 2
+                      }),
+                      option: (base: any, state: any) => ({
+                        ...base,
+                        backgroundColor: state.isFocused ? '#F8F9FB' : 'white',
+                        color: 'rgba(17, 17, 17, 0.84)',
+                        cursor: 'pointer',
+                        padding: '12px 16px'
+                      }),
+                      multiValue: (base: any) => ({
+                        ...base,
+                        backgroundColor: '#E8EAFD',
+                        borderRadius: '4px',
+                        padding: '2px 6px',
+                        margin: '2px',
+                      }),
+                      multiValueLabel: (base: any) => ({
+                        ...base,
+                        color: '#4444E2',
+                        fontSize: '14px'
+                      }),
+                      multiValueRemove: (base: any) => ({
+                        ...base,
+                        color: '#4444E2',
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: '#D8DAFD',
+                          color: '#4444E2'
+                        }
+                      }),
+                      placeholder: (base: any) => ({
+                        ...base,
+                        color: 'rgba(17, 17, 17, 0.48)'
+                      })
+                    }}
+                  />
                 </Box>
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  <Typography
+                    sx={{
+                      mb: 1.5,
+                      fontSize: '16px',
+                      fontWeight: 500,
+                      color: 'rgba(17, 17, 17, 0.92)'
+                    }}
+                  >
                     Availability:
                   </Typography>
                   <RadioGroup
                     value={filters.availability}
-                    onChange={(e) =>
-                      handleFilterChange("availability", e.target.value)
-                    }
+                    onChange={(e) => handleFilterChange("availability", e.target.value)}
                   >
                     <FormControlLabel
                       value="immediately"
-                      control={<Radio />}
+                      control={<StyledRadio />}
                       label="Immediately"
+                      sx={{
+                        '& .MuiTypography-root': {
+                          fontSize: '16px',
+                          color: 'rgba(17, 17, 17, 0.84)'
+                        }
+                      }}
                     />
                     <FormControlLabel
                       value="in-a-week"
-                      control={<Radio />}
+                      control={<StyledRadio />}
                       label="In a week"
+                      sx={{
+                        '& .MuiTypography-root': {
+                          fontSize: '16px',
+                          color: 'rgba(17, 17, 17, 0.84)'
+                        }
+                      }}
                     />
                     <FormControlLabel
                       value="in-a-month"
-                      control={<Radio />}
+                      control={<StyledRadio />}
                       label="In a month"
+                      sx={{
+                        '& .MuiTypography-root': {
+                          fontSize: '16px',
+                          color: 'rgba(17, 17, 17, 0.84)'
+                        }
+                      }}
                     />
                     <FormControlLabel
                       value="in-two-months"
-                      control={<Radio />}
+                      control={<StyledRadio />}
                       label="In two months"
-                    />
-                  </RadioGroup>
-                </Box>
-
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                    Trial:
-                  </Typography>
-                  <RadioGroup
-                    value={filters.trial}
-                    onChange={(e) =>
-                      handleFilterChange("trial", e.target.value)
-                    }
-                  >
-                    <FormControlLabel
-                      value="open-to-trial"
-                      control={<Radio />}
-                      label="Open to trial"
-                    />
-                    <FormControlLabel
-                      value="no-to-trial"
-                      control={<Radio />}
-                      label="No to trial"
+                      sx={{
+                        '& .MuiTypography-root': {
+                          fontSize: '16px',
+                          color: 'rgba(17, 17, 17, 0.84)'
+                        }
+                      }}
                     />
                   </RadioGroup>
                 </Box>
@@ -875,15 +1041,22 @@ export default function Home() {
                 <Button
                   variant="contained"
                   fullWidth
+                  disabled={!hasActiveFilters()}
                   sx={{
-                    bgcolor: "#A5AEFF",
-                    color: "#2A3574",
-                    textTransform: "none",
-                    borderRadius: 2,
-                    py: 1.5,
-                    "&:hover": {
-                      bgcolor: "#8C99FF",
+                    bgcolor: theme.palette.primary.main,
+                    color: theme.palette.secondary.light,
+                    textTransform: 'none',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    fontSize: '16px',
+                    fontWeight: 500,
+                    '&:hover': {
+                      bgcolor: theme.palette.primary.main,
                     },
+                    '&.Mui-disabled': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                      color: 'rgba(0, 0, 0, 0.26)'
+                    }
                   }}
                   onClick={applyFilters}
                 >
@@ -1050,35 +1223,35 @@ export default function Home() {
                 {/* Candidates list */}
                 {loading
                   ? Array.from({ length: 5 }).map((_, index) => (
-                      <Skeleton
-                        key={index}
-                        variant="rectangular"
-                        width="100%"
-                        height={150}
-                        sx={{ mb: 2, borderRadius: 2 }}
-                      />
-                    ))
+                    <Skeleton
+                      key={index}
+                      variant="rectangular"
+                      width="100%"
+                      height={150}
+                      sx={{ mb: 2, borderRadius: 2 }}
+                    />
+                  ))
                   : filteredCandidates?.applications?.map((candidate) => (
-                      <Box
-                        key={candidate.id}
-                        sx={{
-                          borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-                          "&:last-child": {
-                            borderBottom: "none",
-                          },
-                        }}
-                      >
-                        <CandidateListSection
-                          candidate={candidate}
-                          isSelected={selectedEntries?.includes(candidate.id)}
-                          onSelectCandidate={handleSelectCandidate}
-                          onUpdateStages={handleUpdateStages}
-                          disableSelection={subTabValue === 3}
-                          currentStage={getStageValue(subTabValue)}
-                          selectedEntries={selectedEntries}
-                        />
-                      </Box>
-                    ))}
+                    <Box
+                      key={candidate.id}
+                      sx={{
+                        borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+                        "&:last-child": {
+                          borderBottom: "none",
+                        },
+                      }}
+                    >
+                      <CandidateListSection
+                        candidate={candidate}
+                        isSelected={selectedEntries?.includes(candidate.id)}
+                        onSelectCandidate={handleSelectCandidate}
+                        onUpdateStages={handleUpdateStages}
+                        disableSelection={subTabValue === 3}
+                        currentStage={getStageValue(subTabValue)}
+                        selectedEntries={selectedEntries}
+                      />
+                    </Box>
+                  ))}
               </Paper>
             </Box>
           </Stack>
