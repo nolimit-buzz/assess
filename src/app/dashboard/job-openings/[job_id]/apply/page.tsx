@@ -238,7 +238,8 @@ const ApplicationForm = () => {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
-            }
+            },
+            cache: 'no-store'
           }
         );
         setJobData(response.data);
@@ -330,6 +331,7 @@ const ApplicationForm = () => {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
+          cache: 'no-store'
         }
       );
 

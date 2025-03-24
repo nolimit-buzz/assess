@@ -89,7 +89,8 @@ export default function CandidateListSection({
     setAnchorEl(null);
   };
 
-  const handleAction = (action: string) => {
+  const handleAction = (e: React.MouseEvent<HTMLElement>, action: string) => {
+    e.stopPropagation();
     onUpdateStages(action, [candidate.id]);
     handleClose();
   };
@@ -292,7 +293,7 @@ export default function CandidateListSection({
             return (
               <MenuItem
                 key={option.action}
-                onClick={() => handleAction(option.action)}
+                onClick={(e) => handleAction(e,option.action)}
                 sx={{
                   display: "flex",
                   alignItems: "center",

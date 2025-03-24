@@ -165,6 +165,7 @@ export default function ApplicantDetails() {
               Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
+            cache: 'no-store'
           }
         );
         
@@ -202,6 +203,7 @@ export default function ApplicantDetails() {
               Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
+            cache: 'no-store'
           }
         );
         
@@ -244,6 +246,7 @@ export default function ApplicantDetails() {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
+          cache: 'no-store'
         }
       );
 
@@ -272,6 +275,7 @@ export default function ApplicantDetails() {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
+          cache: 'no-store',
           body: JSON.stringify({
             stage: 'skill_assessment'
           })

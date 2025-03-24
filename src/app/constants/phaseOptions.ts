@@ -9,7 +9,7 @@ export const PHASE_OPTIONS = {
     { label: 'Archive', icon: ArchiveIcon , action: 'archived' }
   ],
   skill_assessment: [
-    { label: 'Schedule Interview', icon: AssessmentIcon , action: 'interview' },
+    { label: 'Schedule Interview', icon: AssessmentIcon , action: 'interviews' },
     { label: 'Archive', icon: ArchiveIcon , action: 'archived' }
   ],
   archived: [

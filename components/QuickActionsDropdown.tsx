@@ -36,6 +36,7 @@ const QuickActionsDropdown = ({ submissionId, onViewApplication }: QuickActionsP
         headers: {
           'Content-Type': 'application/json',
         },
+        cache: 'no-store',
         body: JSON.stringify({
           stage,
           entries: [submissionId]

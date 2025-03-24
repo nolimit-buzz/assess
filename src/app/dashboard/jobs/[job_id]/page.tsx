@@ -78,7 +78,8 @@ const JobDetailsPage = () => {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          }
+          },
+          cache: 'no-store'
         });
         setJobData(response.data);
         setLoading(false);

@@ -262,7 +262,8 @@ const Dashboard = () => {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          }
+          },
+          cache: 'no-store'
         });
         const data = await response.json();
         setJobPostings(data);
@@ -281,7 +282,8 @@ const Dashboard = () => {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
-      }
+      },
+      cache: 'no-store'
     })
       .then((response) => response.json())
       .then((data) => {
@@ -326,6 +328,7 @@ const Dashboard = () => {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
+      cache: 'no-store',
       body: JSON.stringify(formData)
     })
       .then((response) => response.json())

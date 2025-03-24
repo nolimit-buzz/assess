@@ -60,6 +60,7 @@ const ActionSection = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        cache: 'no-store',
         body: JSON.stringify({
           stage,
           entries: [/* Add your submission ID here */]

@@ -147,6 +147,7 @@ export default function Home() {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
+            cache: 'no-store'
           },
         );
 
@@ -183,6 +184,7 @@ export default function Home() {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
+            cache: 'no-store'
           },
         );
 
@@ -226,7 +228,7 @@ export default function Home() {
       case 1:
         return "skill_assessment";
       case 2:
-        return "interview";
+        return "interviews";
       case 3:
         return "acceptance";
       case 4:
@@ -276,6 +278,7 @@ export default function Home() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          cache: 'no-store'
         }
       );
 
@@ -679,6 +682,7 @@ export default function Home() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${jwt}`,
           },
+          cache: 'no-store',
           body: JSON.stringify({
             stage,
             entries: entriesToUpdate,

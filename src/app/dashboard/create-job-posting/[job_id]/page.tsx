@@ -477,7 +477,8 @@ const AboutTheJob = () => {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          }
+          },
+          cache: 'no-store'
         });
         const jobData = response.data;
         if (!jobData.description.length) {
