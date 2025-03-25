@@ -59,6 +59,8 @@ import { styled } from "@mui/material/styles";
 import CreatableSelect from 'react-select/creatable';
 import { getSkillsForRole, Skill } from '@/utils/skills';
 
+export const dynamic = 'force-dynamic';
+
 const StyledSelect = styled(Select)({
   '& .MuiSelect-select': {
     backgroundColor: '#fff',
@@ -110,6 +112,13 @@ export default function Home() {
   const [filterMenuAnchor, setFilterMenuAnchor] = useState(null);
   const [quickActionsAnchor, setQuickActionsAnchor] = useState(null);
   const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
+  const [stageTotals, setStageTotals] = useState({
+    new: 0,
+    skill_assessment: 0,
+    interviews: 0,
+    acceptance: 0,
+    archived: 0
+  });
   const [filters, setFilters] = useState({
     yearsOfExperience: "",
     salaryMin: "",
@@ -134,7 +143,6 @@ export default function Home() {
 
   useEffect(() => {
     const fetchJobDetails = async () => {
-      // if (primaryTabValue === 1) {
       setLoading(true);
       setError(null);
       try {
@@ -157,13 +165,16 @@ export default function Home() {
 
         const data = await response.json();
         setJobDetails(data);
+        // Set stage totals from job details
+        if (data.stage_counts) {
+          setStageTotals(data.stage_counts);
+        }
       } catch (err) {
         console.error("Error fetching job details:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
-      // }
     };
 
     fetchJobDetails();
@@ -194,7 +205,7 @@ export default function Home() {
 
         const data = await response.json();
         setCandidates(data);
-        setFilteredCandidates(data); // Initialize filtered candidates with fetched data
+        setFilteredCandidates(data);
       } catch (err) {
         console.error("Error fetching candidates:", err);
         setError(err.message);
@@ -698,7 +709,26 @@ export default function Home() {
       setSelectedEntries([]);
 
       // Refetch candidates for the current stage
-      // await fetchCandidates();
+      const jobId = getJobId();
+      const currentStage = subTabValue === 0 ? "new" : getStageValue(subTabValue);
+      const candidatesResponse = await fetch(
+        `https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${jobId}/applications?stage=${currentStage}`,
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+            "Content-Type": "application/json",
+          },
+          cache: 'no-store'
+        }
+      );
+
+      if (!candidatesResponse.ok) {
+        throw new Error("Failed to fetch updated candidates");
+      }
+
+      const candidatesData = await candidatesResponse.json();
+      setCandidates(candidatesData);
+      setFilteredCandidates(candidatesData);
     } catch (error) {
       console.error("Error updating stages:", error);
     }
@@ -1090,7 +1120,25 @@ export default function Home() {
                   sx={{ width: "100%", alignItems: "center" }}
                 >
                   <Tab
-                    label="Application Review"
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <span>Application Review</span>
+                        <Chip 
+                          label={stageTotals.new} 
+                          size="small" 
+                          sx={{ 
+                            bgcolor: theme.palette.secondary.main,
+                            color: 'white',
+                            height: '20px',
+                            '& .MuiChip-label': {
+                              px: 1,
+                              fontSize: '12px',
+                              fontWeight: 500
+                            }
+                          }}
+                        />
+                      </Box>
+                    }
                     sx={{
                       textTransform: "none",
                       color:
@@ -1101,7 +1149,25 @@ export default function Home() {
                     }}
                   />
                   <Tab
-                    label="Skill assessment"
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <span>Skill assessment</span>
+                        <Chip 
+                          label={stageTotals.skill_assessment} 
+                          size="small" 
+                          sx={{ 
+                            bgcolor: theme.palette.secondary.main,
+                            color: 'white',
+                            height: '20px',
+                            '& .MuiChip-label': {
+                              px: 1,
+                              fontSize: '12px',
+                              fontWeight: 500
+                            }
+                          }}
+                        />
+                      </Box>
+                    }
                     sx={{
                       textTransform: "none",
                       color:
@@ -1112,7 +1178,25 @@ export default function Home() {
                     }}
                   />
                   <Tab
-                    label="Interviews"
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <span>Interviews</span>
+                        <Chip 
+                          label={stageTotals.interviews} 
+                          size="small" 
+                          sx={{ 
+                            bgcolor: theme.palette.secondary.main,
+                            color: 'white',
+                            height: '20px',
+                            '& .MuiChip-label': {
+                              px: 1,
+                              fontSize: '12px',
+                              fontWeight: 500
+                            }
+                          }}
+                        />
+                      </Box>
+                    }
                     sx={{
                       textTransform: "none",
                       color:
@@ -1123,7 +1207,25 @@ export default function Home() {
                     }}
                   />
                   <Tab
-                    label="Acceptance"
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <span>Acceptance</span>
+                        <Chip 
+                          label={stageTotals.acceptance} 
+                          size="small" 
+                          sx={{ 
+                            bgcolor: theme.palette.secondary.main,
+                            color: 'white',
+                            height: '20px',
+                            '& .MuiChip-label': {
+                              px: 1,
+                              fontSize: '12px',
+                              fontWeight: 500
+                            }
+                          }}
+                        />
+                      </Box>
+                    }
                     sx={{
                       textTransform: "none",
                       color:
@@ -1134,7 +1236,25 @@ export default function Home() {
                     }}
                   />
                   <Tab
-                    label="Archived"
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <span>Archived</span>
+                        <Chip 
+                          label={stageTotals.archived} 
+                          size="small" 
+                          sx={{ 
+                            bgcolor: theme.palette.secondary.main,
+                            color: 'white',
+                            height: '20px',
+                            '& .MuiChip-label': {
+                              px: 1,
+                              fontSize: '12px',
+                              fontWeight: 500
+                            }
+                          }}
+                        />
+                      </Box>
+                    }
                     sx={{
                       textTransform: "none",
                       color:
@@ -1232,7 +1352,11 @@ export default function Home() {
                       variant="rectangular"
                       width="100%"
                       height={150}
-                      sx={{ mb: 2, borderRadius: 2 }}
+                      sx={{ 
+                        mb: 2, 
+                        borderRadius: 2,
+                        bgcolor: 'rgba(0, 0, 0, 0.04)' // Lighter grey color
+                      }}
                     />
                   ))
                   : filteredCandidates?.applications?.map((candidate) => (

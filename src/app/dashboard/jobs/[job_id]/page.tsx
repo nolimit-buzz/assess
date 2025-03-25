@@ -23,6 +23,8 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PaidIcon from '@mui/icons-material/Paid';
 
+export const dynamic = 'force-dynamic';
+
 const Banner = styled(Box)(({ theme }) => ({
   width: '100%',
   background: theme.palette.primary.main,

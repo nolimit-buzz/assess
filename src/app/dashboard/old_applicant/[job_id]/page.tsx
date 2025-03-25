@@ -17,6 +17,8 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
+export const dynamic = 'force-dynamic';
+
 const Banner = styled(Box)(({ theme }) => ({
     width: "100%",
     background: theme.palette.primary.main,
@@ -56,8 +58,9 @@ const JobDetailsPage = () => {
                         headers: {
                             'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json'
-                        }}
-                );
+                        },
+                        cache: 'no-store'
+                });
                 setJobData(response.data);
             } catch (err) {
                 setError("Failed to load job details.");

@@ -494,11 +494,13 @@ const AboutTheJob = () => {
             salary_min: jobData.salary_min || '',
             salary_max: jobData.salary_max || ''
           })
+          setCustomFields(jobData.application_form.custom_fields || []);
           setFormFields(jobData.application_form.required_fields || []);
           setLoading(false);
           return
         }
 
+        setCustomFields(jobData.application_form.custom_fields || []);
         setFormData({
           ...jobData,
           expectations: jobData.expectations.split('|||') || [],

@@ -17,6 +17,7 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  Divider,
 } from "@mui/material";
 import React, { useState } from "react";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -25,6 +26,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import { PHASE_OPTIONS } from "@/app/constants/phaseOptions";
 import { useRouter } from "next/navigation";
+import { useTheme } from "@mui/material/styles";
 
 interface PhaseOption {
   label: string;
@@ -57,6 +59,7 @@ export default function CandidateListSection({
   currentStage,
 }: CandidateListSectionProps) {
   const router = useRouter();
+  const theme = useTheme();
   console.log(candidate); // Skills data for mapping
   const skills = candidate?.professional_info?.skills?.split(",");
 
@@ -115,51 +118,51 @@ export default function CandidateListSection({
   return (
     <Paper
       elevation={0}
-      onClick={handleCardClick}
       sx={{
         display: "flex",
         alignItems: "flex-start",
         p: 2,
         borderBottom: "0.8px solid rgba(17, 17, 17, 0.08)",
-        cursor: "pointer",
         "&:hover": {
           backgroundColor: "rgba(0, 0, 0, 0.02)",
         }
       }}
     >
-      <Box sx={{ p: 0 }} className="checkbox-container">
-        <Checkbox
-          sx={{ p: 0 }}
-          onChange={() => onSelectCandidate(candidate.id)}
-          checked={isSelected}
-          icon={
-            <Box
-              sx={{
-                width: 16,
-                height: 16,
-                borderRadius: 1,
-                border: "1px solid grey",
-              }}
-            />
-          }
-          checkedIcon={
-            <Box
-              sx={{
-                p: 0,
-                width: 16,
-                height: 16,
-                borderRadius: 1,
-                bgcolor: "secondary.main",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <CheckIcon sx={{ fontSize: 12, color: "white" }} />
-            </Box>
-          }
-        />
-      </Box>
+      {!disableSelection && (
+        <Box sx={{ p: 0 }} className="checkbox-container">
+          <Checkbox
+            sx={{ p: 0 }}
+            onChange={() => onSelectCandidate(candidate.id)}
+            checked={isSelected}
+            icon={
+              <Box
+                sx={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: 1,
+                  border: "1px solid grey",
+                }}
+              />
+            }
+            checkedIcon={
+              <Box
+                sx={{
+                  p: 0,
+                  width: 16,
+                  height: 16,
+                  borderRadius: 1,
+                  bgcolor: "secondary.main",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <CheckIcon sx={{ fontSize: 12, color: "white" }} />
+              </Box>
+            }
+          />
+        </Box>
+      )}
       <Box
         sx={{
           width: "100%",
@@ -179,7 +182,7 @@ export default function CandidateListSection({
               fontWeight: 600,
               fontSize: 18,
               lineHeight: "18px",
-              color: "rgba(17, 17, 17, 0.92)",
+              color: theme.palette.grey[200],
             }}
           >
             {candidate?.personal_info.firstname}{" "}
@@ -207,7 +210,7 @@ export default function CandidateListSection({
                 {item.icon}
                 <Typography
                   sx={{
-                    color: "rgba(17, 17, 17, 0.68)",
+                    color: theme.palette.grey[200],
                     fontSize: 16,
                     lineHeight: "16px",
                   }}
@@ -226,7 +229,7 @@ export default function CandidateListSection({
               display: "flex",
               alignItems: "center",
               gap: 0.5,
-              color: "rgba(17, 17, 17, 0.92)",
+              color: theme.palette.grey[200],
               fontSize: 16,
               lineHeight: "16px",
             }}
@@ -243,7 +246,7 @@ export default function CandidateListSection({
               label={skill}
               sx={{
                 bgcolor: "#efefef",
-                color: "rgba(17, 17, 17, 0.68)",
+                color: theme.palette.grey[200],
                 borderRadius: "28px",
                 fontSize: 14,
                 fontWeight: 400,
@@ -288,6 +291,31 @@ export default function CandidateListSection({
             horizontal: "right",
           }}
         >
+          {/* View Application Menu Item - Always shown */}
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCardClick(e as any);
+              handleClose();
+            }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              py: 1.5,
+              px: 2,
+            }}
+          >
+            <ListItemIcon>
+              <VisibilityIcon />
+            </ListItemIcon>
+            <ListItemText primary="View application" />
+          </MenuItem>
+
+          {/* Divider between View application and other actions */}
+          <Divider />
+
+          {/* Phase-specific options */}
           {PHASE_OPTIONS[currentStage]?.map((option: PhaseOption) => {
             const IconComponent = option.icon;
             return (

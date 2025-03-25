@@ -7,6 +7,8 @@ import PDFParser from 'pdf-parse';
 import { createWorker } from 'tesseract.js';
 import Papa from 'papaparse';
 
+export const dynamic = 'force-dynamic';
+
 // Disable body parser for file uploads
 export const config = {
   api: {
@@ -71,10 +73,18 @@ export default async function handler(req, res) {
     // Clean up the temp file
     fs.unlinkSync(filePath);
 
-    return res.status(200).json({ content });
+    return res.status(200).json({ content }, {
+      headers: {
+        'Cache-Control': 'no-store'
+      }
+    });
   } catch (error) {
     console.error('Document parsing error:', error);
-    return res.status(500).json({ error: 'Failed to parse document', details: error.message });
+    return res.status(500).json({ error: 'Failed to parse document', details: error.message }, {
+      headers: {
+        'Cache-Control': 'no-store'
+      }
+    });
   }
 }
 

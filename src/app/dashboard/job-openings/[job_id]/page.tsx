@@ -21,6 +21,8 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SchoolIcon from '@mui/icons-material/School';
 import WorkIcon from '@mui/icons-material/Work';
 
+export const dynamic = 'force-dynamic';
+
 const Banner = styled(Box)(({ theme }) => ({
   width: '100%',
   background: theme.palette.primary.main,
