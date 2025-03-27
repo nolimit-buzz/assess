@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import {
@@ -21,6 +21,8 @@ import {
   Autocomplete,
   Dialog,
   DialogContent,
+  Fade,
+  Slide,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
@@ -28,6 +30,7 @@ import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import { getSkillsForRole, addCustomSkill, Skill } from '@/utils/skills';
+import Image from 'next/image';
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 console.log(GOOGLE_MAPS_API_KEY);
@@ -58,8 +61,22 @@ const StyledButton = styled(Button)(({ theme }) => ({
   fontWeight: 500,
   lineHeight: '100%',
   letterSpacing: '0.16px',
+  transition: 'all 0.2s ease-in-out',
   '&:hover': {
-    backgroundColor: '#3333B3',
+    backgroundColor: 'rgba(3, 43, 68, 0.7)', // Lighter shade of #4444E2
+    transform: 'translateY(-1px)',
+    boxShadow: '0 4px 12px rgba(68, 68, 226, 0.15)',
+  },
+  '&.MuiButton-outlined': {
+    backgroundColor: 'transparent',
+    color: theme.palette.primary.main,
+    borderColor: theme.palette.primary.main,
+    '&:hover': {
+      backgroundColor: 'rgba(68, 68, 226, 0.08)',
+      borderColor: theme.palette.primary.main,
+      transform: 'translateY(-1px)',
+      boxShadow: '0 4px 12px rgba(68, 68, 226, 0.1)',
+    }
   }
 }));
 
@@ -68,9 +85,9 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     position: 'relative',
     transform: 'none',
     color: 'rgba(17, 17, 17, 0.92)',
-    fontWeight: 500,
-    fontSize: '16px',
-    marginBottom: '8px',
+    fontWeight: 600,
+    fontSize: '24px',
+    marginBottom: '16px',
     '&.Mui-focused': {
       color: 'rgba(17, 17, 17, 0.92)',
     },
@@ -90,14 +107,19 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
   },
   '& .MuiInputBase-input': {
     padding: '16px',
+    fontSize: '20px',
+    '&::placeholder': {
+      fontSize: '20px',
+      color: 'rgba(17, 17, 17, 0.48)',
+    },
   },
 }));
 
 const StyledFormLabel = styled(FormLabel)({
   color: 'rgba(17, 17, 17, 0.92)',
-  fontWeight: 500,
-  fontSize: '16px',
-  marginBottom: '8px',
+  fontWeight: 600,
+  fontSize: '24px',
+  marginBottom: '16px',
   '&.Mui-focused': {
     color: 'rgba(17, 17, 17, 0.92)',
   },
@@ -114,7 +136,7 @@ const StyledFormControlLabel = styled(FormControlLabel)({
   },
   '& .MuiTypography-root': {
     color: 'rgba(17, 17, 17, 0.84)',
-    fontSize: '16px',
+    fontSize: '20px',
   },
 });
 
@@ -220,6 +242,11 @@ const ApplicationForm = () => {
   const [locationInputError, setLocationInputError] = useState('');
   const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
   const [customSkillInput, setCustomSkillInput] = useState('');
+  const [allFields, setAllFields] = useState<(JobData['application_form']['required_fields'][0] | JobData['application_form']['custom_fields'][0])[]>([]);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [direction, setDirection] = useState<'up' | 'down'>('down');
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const fetchJobDetails = async () => {
@@ -238,8 +265,7 @@ const ApplicationForm = () => {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
-            },
-            cache: 'no-store'
+            }
           }
         );
         setJobData(response.data);
@@ -262,6 +288,16 @@ const ApplicationForm = () => {
       }
     };
     loadSkills();
+  }, [jobData]);
+
+  useEffect(() => {
+    if (jobData) {
+      const combinedFields = [
+        ...jobData.application_form.required_fields,
+        ...jobData.application_form.custom_fields
+      ];
+      setAllFields(combinedFields);
+    }
   }, [jobData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -311,16 +347,10 @@ const ApplicationForm = () => {
     if (formData.cv) {
       formDataObj.append('cv', formData.cv);
     }
-    formDataObj.append("job_type", "fulltime");
-        formDataObj.append("work_model", "remote");
-        formDataObj.append("availability", "week");
-        formDataObj.append("experience", "5 years");
-        formDataObj.append("current_role", "jnr dev");
-        formDataObj.append("work_preference", "remote");
-        formDataObj.append("salary_range", "100-200");
-        formDataObj.append("start_date", "immediately");
-        formDataObj.append("address", "34 Ellasan");
-        formDataObj.append("github_profile", "https://wwww.linked.com");
+    formDataObj.append("current_role", jobData?.title || '');
+    formDataObj.append("work_preference", "remote");
+    formDataObj.append("salary_range", "100-200");
+    formDataObj.append("start_date", formData.availability);
 
     try {
       const token = localStorage.getItem('jwt');
@@ -331,7 +361,6 @@ const ApplicationForm = () => {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
-          cache: 'no-store'
         }
       );
 
@@ -339,6 +368,28 @@ const ApplicationForm = () => {
       setFormSubmitted(true);
     } catch (error) {
       alert('Failed to submit application. Please try again.');
+    }
+  };
+
+  const handleNext = async () => {
+    if (currentStep < allFields.length - 1) {
+      setIsTransitioning(true);
+      setDirection('up');
+      await new Promise(resolve => setTimeout(resolve, 300));
+      setCurrentStep(prev => prev + 1);
+      setIsTransitioning(false);
+      stepRefs.current[currentStep + 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  const handleBack = async () => {
+    if (currentStep > 0) {
+      setIsTransitioning(true);
+      setDirection('down');
+      await new Promise(resolve => setTimeout(resolve, 300));
+      setCurrentStep(prev => prev - 1);
+      setIsTransitioning(false);
+      stepRefs.current[currentStep - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
 
@@ -634,11 +685,16 @@ const ApplicationForm = () => {
   }
 
   return (
-    <Box sx={{ backgroundColor: '#F1F4F9', minHeight: '100vh' }}>
+    <Box sx={{ 
+      backgroundColor: '#F1F4F9', 
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
       <Banner
         sx={{
           backgroundColor: theme.palette.primary.main,
-          backgroundImage: "url(/images/backgrounds/banner-bg.svg)",
+          backgroundImage: "url(/images/backgrounds/banner-bg-img.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -647,7 +703,8 @@ const ApplicationForm = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          textAlign: 'center'
+          textAlign: 'center',
+          flexShrink: 0
         }}
       >
         <Typography variant="h4" sx={{ 
@@ -673,13 +730,27 @@ const ApplicationForm = () => {
         </Stack>
       </Banner>
 
-      <Container sx={{ py: 4, maxWidth: '800px !important' }}>
+      <Box sx={{ 
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        py: 4,
+        px: { xs: 2, sm: 4 }
+      }}>
         {!formSubmitted && (
           <Box sx={{ 
             backgroundColor: '#fff', 
             borderRadius: '8px',
-            padding: '40px',
-            marginBottom: '24px'
+            padding: { xs: '24px', sm: '40px' },
+            marginBottom: '24px',
+            width: '100%',
+            maxWidth: '800px',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'relative',
+            overflow: 'hidden'
           }}>
             <Typography variant="h4" sx={{ 
               marginBottom: '32px',
@@ -689,18 +760,102 @@ const ApplicationForm = () => {
               Apply for {jobData?.title}
             </Typography>
 
-            <form onSubmit={handleSubmit}>
-              <Stack spacing={3}>
-                {jobData?.application_form.required_fields.map(field => renderField(field))}
-                {jobData?.application_form.custom_fields.map(field => renderField(field))}
+            {/* Progress indicator */}
+            <Box sx={{ mb: 4 }}>
+              <Typography sx={{ 
+                color: 'rgba(17, 17, 17, 0.68)',
+                fontSize: '18px',
+                fontWeight: 500,
+                mb: 1
+              }}>
+                Question {currentStep + 1} of {allFields.length}
+              </Typography>
+              <Box sx={{ 
+                width: '100%', 
+                height: '4px', 
+                backgroundColor: 'rgba(17, 17, 17, 0.08)',
+                borderRadius: '2px',
+                overflow: 'hidden'
+              }}>
+                <Box sx={{ 
+                  width: `${((currentStep + 1) / allFields.length) * 100}%`,
+                  height: '100%',
+                  backgroundColor: 'primary.main',
+                  transition: 'width 0.3s ease-in-out'
+                }} />
+              </Box>
+            </Box>
+
+            <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ 
+                position: 'relative',
+                flex: 1,
+                minHeight: '200px',
+                display: 'flex',
+                alignItems: 'center',
+                overflow: 'hidden'
+              }}>
+                <Box sx={{
+                  display: 'flex',
+                  width: '100%',
+                  transform: `translateY(${currentStep * -100}%)`,
+                  transition: 'transform 0.3s ease-in-out',
+                  position: 'relative',
+                  height: `${allFields.length * 100}%`
+                }}>
+                  {allFields.map((field, index) => (
+                    <Box
+                      key={field.key}
+                      sx={{
+                        width: '100%',
+                        flexShrink: 0,
+                        padding: '0 16px',
+                        height: `${100 / allFields.length}%`,
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}
+                    >
+                      {renderField(field)}
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+              
+              <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ mt: 2 }}>
+                {currentStep > 0 && (
+                  <StyledButton
+                    onClick={handleBack}
+                    variant="outlined"
+                    sx={{
+                      backgroundColor: 'transparent',
+                      color: 'primary.main',
+                      borderColor: 'primary.main',
+                      '&:hover': {
+                        backgroundColor: 'rgba(68, 68, 226, 0.08)',
+                      }
+                    }}
+                  >
+                    Back
+                  </StyledButton>
+                )}
                 
-                <StyledButton
-                  type="submit"
-                  variant="contained"
-                  fullWidth
-                >
-                  Apply for this Job
-                </StyledButton>
+                {currentStep < allFields.length - 1 ? (
+                  <StyledButton
+                    onClick={handleNext}
+                    variant="contained"
+                    sx={{ ml: 'auto' }}
+                  >
+                    Next
+                  </StyledButton>
+                ) : (
+                  <StyledButton
+                    type="submit"
+                    variant="contained"
+                    sx={{ ml: 'auto' }}
+                  >
+                    Submit Application
+                  </StyledButton>
+                )}
               </Stack>
             </form>
           </Box>
@@ -720,14 +875,11 @@ const ApplicationForm = () => {
         >
           <DialogContent>
             <Box sx={{ mb: 3 }}>
-              <img 
-                src="/images/success-icon.svg" 
-                alt="Success" 
-                style={{ 
-                  width: '80px', 
-                  height: '80px',
-                  marginBottom: '24px'
-                }} 
+              <Image
+                src="/images/success-icon.svg"
+                alt="Success"
+                width={80}
+                height={80}
               />
             </Box>
             <Typography variant="h4" sx={{ 
@@ -753,7 +905,7 @@ const ApplicationForm = () => {
             </StyledButton>
           </DialogContent>
         </Dialog>
-      </Container>
+      </Box>
     </Box>
   );
 };

@@ -14,18 +14,20 @@ import {
   Avatar
 } from "@mui/material";
 import PropTypes from "prop-types";
+import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 // components
 import Profile from "./Profile"
 import { IconBellRinging, IconMenu } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
 
 interface ItemType {
   toggleMobileSidebar: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
-const Header = ({ toggleMobileSidebar }: ItemType) => {
-  // const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
-  // const lgDown = useMediaQuery((theme) => theme.breakpoints.down('lg'));
-
+const Header = () => {
+  const pathname = usePathname();
+  const router = useRouter();
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
     boxShadow: "none",
     background: theme.palette.background.paper,
@@ -43,37 +45,66 @@ const Header = ({ toggleMobileSidebar }: ItemType) => {
     display: "flex",
     justifyContent: "space-between",
     padding: "0 20px",
-    maxWidth:'1500px',
+    maxWidth:'1536px',
     margin:'auto',
-    [theme.breakpoints.up("lg")]: {
-      padding: "0 80px",
-    },
+    // [theme.breakpoints.up("lg")]: {
+    //   padding: "0 80px",
+    // },
   }));
   
   const ProfileButtonStyled = styled(Button)(({ theme }) => ({
     width: "100%",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.palette.secondary.light,
     color: theme.palette.grey[600],
     borderRadius: "50px",
-    border: `1px solid ${theme.palette.grey[300]}`,
+    border: `1.2px solid ${theme.palette.secondary.dark}`,
     display: "flex",
     gap: '10px',
+    transition: 'all 0.2s ease-in-out',
+    '&:hover': {
+      backgroundColor: theme.palette.secondary.light,
+      transform: 'translateY(-1px)',
+      boxShadow: '0 4px 12px rgba(11, 18, 213, 0.1)',
+    }
   }));
 
   const LinkStyled = styled(Link)(({ theme }) => ({
-    color: theme.palette.grey[100],
+    color: 'rgba(17, 17, 17, 0.72)',
     fontWeight: theme.typography.fontWeightMedium,
     textDecoration: "none",
+    transition: 'color 0.2s ease-in-out',
+    '&:hover': {
+      color: `rgba(11, 18, 213, 0.5)`,
+    },
+    '&.active': {
+      color: theme.palette.primary.main,
+    }
   }));
 
-  const links = [{ href: "/", title: "Dashboard" }, { href: "/applications", title: "Applications" }, { href: "/notifications", title: "Notifications" }];
+  const links = [{ href: "/dashboard", title: "Dashboard" }, { href: "/dashboard/applications", title: "Applications" }, { href: "/notifications", title: "Notifications" }];
   return (
     <AppBarStyled position="sticky" color="default">
 
       <ToolbarStyled direction='row' alignItems='center' justifyContent='space-between'>
-        <Box>        <img style={{ display: "block" }} width={120} height={56} src="/images/logos/logo.svg" alt="elevatehr" />
+        <Box           sx={{cursor:'pointer'}}
+onClick={() => router.push('/dashboard')}>        <Image
+          src="/images/logos/logo.svg"
+          alt="elevatehr"
+          width={120}
+          height={56}
+        />
         </Box>
-        <Stack direction='row' width='max-content' gap={2}>{links.map((link) => <LinkStyled key={link.title} href={link.href}>{link.title}</LinkStyled>)}</Stack>
+        <Stack direction='row' width='max-content' gap={4}>
+          {links.map((link) => (
+            <LinkStyled 
+              key={link.title} 
+              href={link.href}
+              className={pathname === link.href ? 'active' : ''}
+            >
+              {link.title}
+            </LinkStyled>
+          ))}
+        </Stack>
         <Stack spacing={1} direction="row" alignItems="center">
           <Box
             sx={{
@@ -83,9 +114,8 @@ const Header = ({ toggleMobileSidebar }: ItemType) => {
               },
             }}
           >
-            <ProfileButtonStyled>
-              <Typography>Alimosho J.</Typography>
-              <Avatar
+            <ProfileButtonStyled onClick={() => router.push('/dashboard/profile')}>
+            <Avatar
                 src="/images/profile/user-1.jpg"
                 alt="image"
                 sx={{
@@ -93,6 +123,8 @@ const Header = ({ toggleMobileSidebar }: ItemType) => {
                   height: 28,
                 }}
               />
+              <Typography>Alimosho J.</Typography>
+
             </ProfileButtonStyled>
           </Box>
 

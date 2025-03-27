@@ -1,126 +1,99 @@
-import React from 'react';
-import {
-  Box,
-  Grid,
-  Skeleton,
-  Stack,
-  Typography,
-  styled
-} from '@mui/material';
-import PageContainer from '@/app/dashboard/components/container/PageContainer';
-import DashboardCard from './shared/DashboardCard';
+"use client";
+import React from "react";
+import { Box, Skeleton, Grid } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
-const ToolbarStyled = styled(Stack)(({ theme }) => ({
-  width: "100%",
-  color: theme.palette.text.secondary,
+const StatCardSkeleton = styled(Box)<{ index: number; length: number }>(({ theme, index, length }) => ({
+  height: "180px",
+  background: "#FFFFFF",
+  borderRadius: index === 0 ? '10px 0 0 10px' : (index === length - 1 ? '0 10px 10px 0' : '0px'),
+  borderRight: index < length - 1 ? '1px solid rgba(17,17,17,0.12)' : 'none',
+  padding: "20px",
   display: "flex",
+  flexDirection: "column",
   justifyContent: "space-between",
-  marginBottom: theme.spacing(3),
-  marginTop: '40px'
-}));
-
-const Greeting = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  fontFamily: theme.typography.fontFamily,
-  fontWeight: theme.typography.fontWeightBold,
-  fontSize: theme.typography.pxToRem(24),
+  transition: "all 0.3s ease-in-out",
+  cursor: "pointer",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.08)",
+    "& .stat-value": {
+      color: theme.palette.primary.main,
+    },
+    "& .stat-title": {
+      color: theme.palette.primary.main,
+    },
+  },
 }));
 
 const DashboardSkeleton = () => {
-  // Create an array of 6 for the stat cards
-  const statCards = Array(6).fill(0);
-
+  const statCards = [1, 2, 3, 4, 5, 6];
+  
   return (
-    <PageContainer title="Dashboard" description="this is Dashboard">
-      <ToolbarStyled direction='row' alignItems='center' justifyContent='space-between'>
-        <Stack spacing={'12px'}>
-          <Greeting variant='body1' fontWeight='semibold'>Hello Recruiter,</Greeting>
-          <Typography variant='body2' fontWeight='semibold' fontSize='16px' color={'rgba(17,17,17,0.62)'}>Welcome to your Dashboard</Typography>
-        </Stack>
-        <Skeleton variant="rectangular" width={220} height={52} sx={{ borderRadius: '8px' }} />
-      </ToolbarStyled>
-      <Box>
-        <Grid container spacing={3}>
-          {/* Stat Cards Skeleton */}
-          <Grid container item xs={12} marginBottom={3}>
-            {statCards.map((_, index) => (
-              <Grid item xs={2} key={index}>
-                <DashboardCard
-                  customStyle={{
-                    borderRadius: index === 0 ? '10px 0 0 10px' : (index === statCards.length - 1 ? '0 10px 10px 0' : '0px'),
-                    borderRight: index < statCards.length - 1 ? '1px solid rgba(17,17,17,0.12)' : 'none',
-                    padding: '30px',
-                  }}
-                >
-                  <Stack>
-                    <Skeleton variant="circular" width={32} height={32} />
-                    <Skeleton variant="text" width={80} height={50} sx={{ marginTop: '20px', marginBottom: '10px' }} />
-                    <Skeleton variant="text" width={100} height={24} />
-                  </Stack>
-                </DashboardCard>
-              </Grid>
-            ))}
+    <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', background: '#F3F4F7', minHeight: '100vh', padding: '40px 24px' }}>
+      <Box sx={{ maxWidth: '1440px', width: '100%' }}>
+        {/* Header Skeleton */}
+        <Box sx={{ mb: 3, mt: "40px" }}>
+          <Skeleton variant="text" width={200} height={32} />
+          <Skeleton variant="text" width={300} height={24} />
+        </Box>
+
+        {/* Stats Cards Skeleton */}
+        <Grid container spacing={0} mb={6}>
+          {statCards.map((_, index) => (
+            <Grid item xs={2} key={index}>
+              <StatCardSkeleton index={index} length={statCards.length}>
+                <Box sx={{ width: '100%' }}>
+                  <Skeleton variant="rectangular" width={60} height={60} sx={{ borderRadius: '30px' }} />
+                  <Skeleton variant="text" width={60} height={40} className="stat-value" sx={{ mt: '16px', mb: '8px' }} />
+                  <Skeleton variant="text" width={50} height={24} className="stat-title" />
+                </Box>
+              </StatCardSkeleton>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Main Content Skeleton */}
+        <Grid container spacing={4}>
+          {/* Main Panel */}
+          <Grid item xs={12} lg={8}>
+            <Box sx={{ background: '#FFFFFF', borderRadius: '10px', p: 3, height: '700px', overflow: 'scroll' }}>
+              <Box sx={{ mb: 2 }}>
+                <Skeleton variant="text" width={200} height={32} />
+              </Box>
+              <Skeleton variant="rectangular" height={60} sx={{ borderRadius: '8px', mb: 2 }} />
+              {[1, 2, 3, 4, 5].map((index) => (
+                <Skeleton key={index} variant="rectangular" height={150} sx={{ borderRadius: '8px', mb: 2 }} />
+              ))}
+            </Box>
           </Grid>
 
-          {/* Job Postings and Notifications Skeleton */}
-          <Grid container item xs={12} spacing={3} justifyContent={'space-between'} minHeight={'500px'} maxHeight={'700px'} px={2}>
-            {/* Job Postings Column */}
-            <Grid item xs={12} lg={8} maxHeight={'100%'} overflow={'scroll'} p={2}>
-              <DashboardCard customStyle={{ height: '100%', overflow: 'scroll',p:2 }}>
-                <Stack spacing={2}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Skeleton variant="text" width={150} height={32} />
-                    <Skeleton variant="text" width={100} height={32} />
-                  </Stack>
-                  
-                  {/* Job posting items */}
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <Box key={index} sx={{ mb: 2 }}>
-                      <Skeleton variant="rectangular" width="100%" height={120} sx={{ borderRadius: '8px' }} />
-                    </Box>
-                  ))}
-                </Stack>
-              </DashboardCard>
+          {/* Side Panel */}
+          <Grid container item spacing={4} xs={12} lg={4}>
+            <Grid item xs={12} sm={6} lg={12} sx={{ flex: 1, maxHeight: '50%', overflow: 'scroll' }}>
+              <Box sx={{ background: '#FFFFFF', borderRadius: '10px', p: 3, height: '340px' }}>
+                <Box sx={{ mb: 2 }}>
+                  <Skeleton variant="text" width={150} height={32} />
+                </Box>
+                {[1, 2, 3].map((index) => (
+                  <Skeleton key={index} variant="rectangular" height={80} sx={{ borderRadius: '8px', mb: 2 }} />
+                ))}
+              </Box>
             </Grid>
-
-            {/* Notifications and Email Templates */}
-            <Grid container item spacing={'12px'} xs={12} lg={4} minHeight={'500px'} maxHeight={'700px'}>
-              {/* Notifications */}
-              <Grid item xs={12} sm={6} lg={12} flex={1} maxHeight={'50%'} overflow={'scroll'}>
-                <DashboardCard customStyle={{ height: '100%', overflow: 'scroll',px:2}}>
-                  <Stack spacing={2}>
-                    <Skeleton variant="text" width={140} height={32} />
-                    
-                    {/* Notification items */}
-                    {Array.from({ length: 3 }).map((_, index) => (
-                      <Box key={index} sx={{ mb: 2 }}>
-                        <Skeleton variant="rectangular" width="100%" height={80} sx={{ borderRadius: '8px' }} />
-                      </Box>
-                    ))}
-                  </Stack>
-                </DashboardCard>
-              </Grid>
-              
-              {/* Email Templates */}
-              <Grid item xs={12} sm={6} lg={12} flex={1} maxHeight={'50%'} overflow={'scroll'}>
-                <DashboardCard customStyle={{ height: '100%', overflow: 'scroll',p:2 }}>
-                  <Stack spacing={2}>
-                    <Skeleton variant="text" width={160} height={32} />
-                    
-                    {/* Email template items */}
-                    {Array.from({ length: 3 }).map((_, index) => (
-                      <Box key={index} sx={{ mb: 2 }}>
-                        <Skeleton variant="rectangular" width="100%" height={80} sx={{ borderRadius: '8px' }} />
-                      </Box>
-                    ))}
-                  </Stack>
-                </DashboardCard>
-              </Grid>
+            <Grid item xs={12} sm={6} lg={12} sx={{ flex: 1, maxHeight: '50%', overflow: 'scroll' }}>
+              <Box sx={{ background: '#FFFFFF', borderRadius: '10px', p: 3, height: '340px' }}>
+                <Box sx={{ mb: 2 }}>
+                  <Skeleton variant="text" width={150} height={32} />
+                </Box>
+                {[1, 2, 3].map((index) => (
+                  <Skeleton key={index} variant="rectangular" height={80} sx={{ borderRadius: '8px', mb: 2 }} />
+                ))}
+              </Box>
             </Grid>
           </Grid>
         </Grid>
       </Box>
-    </PageContainer>
+    </Box>
   );
 };
 

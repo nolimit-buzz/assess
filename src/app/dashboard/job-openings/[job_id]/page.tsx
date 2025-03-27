@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import {
   Container,
   Box,
@@ -22,6 +22,21 @@ import SchoolIcon from '@mui/icons-material/School';
 import WorkIcon from '@mui/icons-material/Work';
 
 export const dynamic = 'force-dynamic';
+
+interface JobData {
+  title: string;
+  location: string;
+  work_model: string;
+  job_type: string;
+  description: string;
+  about_role: string;
+  responsibilities: string;
+  expectations: string;
+  salary_min?: number;
+  salary_max?: number;
+  qualifications?: string;
+  experience_years?: string;
+}
 
 const Banner = styled(Box)(({ theme }) => ({
   width: '100%',
@@ -50,8 +65,11 @@ const StyledButton = styled(Button)(({ theme }) => ({
   fontWeight: 500,
   lineHeight: '100%',
   letterSpacing: '0.16px',
+  transition: 'all 0.2s ease-in-out',
   '&:hover': {
-    backgroundColor: '#3333B3',
+    backgroundColor: 'rgba(3, 43, 68, 0.7)',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 4px 12px rgba(68, 68, 226, 0.15)',
   }
 }));
 
@@ -59,7 +77,7 @@ const JobDetailsPage = () => {
   const theme = useTheme();
   const { job_id } = useParams();
   const router = useRouter();
-  const [jobData, setJobData] = useState(null);
+  const [jobData, setJobData] = useState<JobData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -74,13 +92,13 @@ const JobDetailsPage = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('jwt');
-        const response = await axios.get(`https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${job_id}`, {
+        const config: AxiosRequestConfig = {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          },
-          cache: 'no-store'
-        });
+          }
+        };
+        const response = await axios.get(`https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${job_id}`, config);
         setJobData(response.data);
         setLoading(false);
       } catch (err) {
@@ -121,7 +139,7 @@ const JobDetailsPage = () => {
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: theme.palette.primary.main,
-          backgroundImage: "url(/images/backgrounds/banner-bg.svg)",
+          backgroundImage: "url(/images/backgrounds/banner-bg-img.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -174,8 +192,7 @@ const JobDetailsPage = () => {
                   }}>
                     About the Role
                   </Typography>
-                  <Box sx={{ color: 'rgba(17, 17, 17, 0.84)' }} dangerouslySetInnerHTML={{ __html: jobData?.about_role }} />
-
+                  <Box sx={{ color: 'rgba(17, 17, 17, 0.84)' }} dangerouslySetInnerHTML={{ __html: jobData?.about_role || '' }} />
                 </Box>
 
                 <Box>
@@ -186,7 +203,7 @@ const JobDetailsPage = () => {
                   }}>
                     Job Responsibilities
                   </Typography>
-                  <Box sx={{ color: 'rgba(17, 17, 17, 0.84)' }} dangerouslySetInnerHTML={{ __html: jobData?.responsibilities }} />
+                  <Box sx={{ color: 'rgba(17, 17, 17, 0.84)' }} dangerouslySetInnerHTML={{ __html: jobData?.responsibilities || '' }} />
                 </Box>
 
                 <Box>
@@ -198,9 +215,8 @@ const JobDetailsPage = () => {
                     Expectations of this Role
                   </Typography>
                   <Stack spacing={1}>
-                    {jobData?.expectations.split('|||').map((expectation, index) => (
+                    {jobData?.expectations.split('|||').map((expectation: string, index: number) => (
                       <Stack key={index} direction="row" spacing={1} alignItems="flex-start">
-                        {/* <ElectricBoltIcon sx={{ color: theme.palette.primary.main, fontSize: 20 }} /> */}
                         <Typography sx={{ color: 'rgba(17, 17, 17, 0.84)' }}>
                         • {expectation}
                         </Typography>
@@ -240,35 +256,35 @@ const JobDetailsPage = () => {
                 <Stack direction="row" spacing={1} alignItems="center">
                   <AccessTimeIcon sx={{ color: 'rgba(17, 17, 17, 0.6)', fontSize: 20 }} />
                   <Typography sx={{ color: 'rgba(17, 17, 17, 0.84)' }}>
-                    Full-Time
+                    {jobData?.job_type || 'Full-Time'}
                   </Typography>
                 </Stack>
 
                 <Stack direction="row" spacing={1} alignItems="center">
                   <WorkIcon sx={{ color: 'rgba(17, 17, 17, 0.6)', fontSize: 20 }} />
                   <Typography sx={{ color: 'rgba(17, 17, 17, 0.84)' }}>
-                    Remote
+                    {jobData?.work_model || 'Remote'}
                   </Typography>
                 </Stack>
 
                 <Stack direction="row" spacing={1} alignItems="center">
                   <LocationOnIcon sx={{ color: 'rgba(17, 17, 17, 0.6)', fontSize: 20 }} />
                   <Typography sx={{ color: 'rgba(17, 17, 17, 0.84)' }}>
-                    Lagos, Nigeria
+                    {jobData?.location || 'Lagos, Nigeria'}
                   </Typography>
                 </Stack>
 
                 <Stack direction="row" spacing={1} alignItems="center">
                   <SchoolIcon sx={{ color: 'rgba(17, 17, 17, 0.6)', fontSize: 20 }} />
                   <Typography sx={{ color: 'rgba(17, 17, 17, 0.84)' }}>
-                    Bachelor's Degree
+                    {jobData?.qualifications || 'Bachelor\'s Degree'}
                   </Typography>
                 </Stack>
 
                 <Stack direction="row" spacing={1} alignItems="center">
                   <WorkIcon sx={{ color: 'rgba(17, 17, 17, 0.6)', fontSize: 20 }} />
                   <Typography sx={{ color: 'rgba(17, 17, 17, 0.84)' }}>
-                    6-7 Years of Experience
+                    {jobData?.experience_years || '6-7 Years of Experience'}
                   </Typography>
                 </Stack>
               </Stack>

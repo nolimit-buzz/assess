@@ -54,6 +54,11 @@ export async function generateInput(request: { jobTitle: string, jobLevel: strin
         console.log('Generated content:', generatedText);
         
         try {
+            // Check if generatedText is null or empty
+            if (!generatedText) {
+                throw new Error('Generated text is empty or null');
+            }
+            
             // Parse the JSON response
             const parsedResponse = JSON.parse(generatedText);
             

@@ -4,10 +4,18 @@ import Image from 'next/image';
 
 
 // components/SkillTag.js
+import React from 'react';
 import { Chip } from '@mui/material';
 
+// Define valid skill types
+type SkillType = 'communication' | 'data analysis' | 'strategic thinking' | 'empathy' | 'prioritization';
+
+interface SkillTagProps {
+  label: string;
+}
+
 // Function to get background color based on label
-function getBackgroundColor(label) {
+function getBackgroundColor(label: string): string {
   switch (label.toLowerCase()) {
     case 'communication':
       return '#FFF4E5';
@@ -20,12 +28,12 @@ function getBackgroundColor(label) {
     case 'prioritization':
       return '#E8EAED';
     default:
-      return '#F5F5F5';
+      return '#F8F9FB';
   }
 }
 
 // Function to get text color based on label
-function getTextColor(label) {
+function getTextColor(label: string): string {
   switch (label.toLowerCase()) {
     case 'communication':
       return '#B54708';
@@ -42,13 +50,15 @@ function getTextColor(label) {
   }
 }
 
-export default function SkillTag({ label }) {
+const SkillTag: React.FC<SkillTagProps> = ({ label }) => {
+  const backgroundColor = getBackgroundColor(label);
+  
   return (
     <Chip
       label={label}
       sx={{
         borderRadius: 1,
-        backgroundColor: getBackgroundColor(label),
+        backgroundColor,
         color: getTextColor(label),
         fontSize: '0.75rem',
         height: 28,
@@ -58,4 +68,6 @@ export default function SkillTag({ label }) {
       }}
     />
   );
-}
+};
+
+export default SkillTag;

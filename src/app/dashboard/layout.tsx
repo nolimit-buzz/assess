@@ -2,7 +2,6 @@
 import { styled, Container, Box } from "@mui/material";
 import React, { useState } from "react";
 import Header from "@/app/dashboard/layout/header/Header";
-import Sidebar from "@/app/dashboard/layout/sidebar/Sidebar";
 
 const MainWrapper = styled("div")(() => ({
   display: "flex",
@@ -29,27 +28,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   return (
       <main>
-        <Header toggleMobileSidebar={() => setMobileSidebarOpen(true)} />
+        <Header/>
         <MainWrapper className="mainwrapper">
-          {/* ------------------------------------------- */}
-          {/* Sidebar */}
-          {/* ------------------------------------------- */}
-          {/*<Sidebar*/}
-          {/*  isSidebarOpen={isSidebarOpen}*/}
-          {/*  isMobileSidebarOpen={isMobileSidebarOpen}*/}
-          {/*  onSidebarClose={() => setMobileSidebarOpen(false)}*/}
-          {/*/>*/}
-          {/* ------------------------------------------- */}
-          {/* Main Wrapper */}
-          {/* ------------------------------------------- */}
           <PageWrapper className="page-wrapper">
-            {/* ------------------------------------------- */}
-            {/* PageContent */}
-            {/* ------------------------------------------- */}
             <Container
                 sx={{
                   maxWidth: "100% !important",
@@ -59,18 +42,10 @@ export default function RootLayout({
 
                 }}
             >
-              {/* ------------------------------------------- */}
-              {/* Header */}
-              {/* ------------------------------------------- */}
-              {/* ------------------------------------------- */}
-              {/* Page Route */}
-              {/* ------------------------------------------- */}
+             
               <Box sx={{ width:'100%',minHeight: "calc(100vh - 170px)"  }}>
                 {children}
               </Box>
-              {/* ------------------------------------------- */}
-              {/* End Page */}
-              {/* ------------------------------------------- */}
             </Container>
           </PageWrapper>
         </MainWrapper>

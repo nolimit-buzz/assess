@@ -1,94 +1,156 @@
 "use client";
-import { Grid, Box, Card, Typography, Stack } from "@mui/material";
 import Link from "next/link";
+import { Box, Stack, Typography, Container, styled, Chip } from "@mui/material";
 import PageContainer from "@/app/dashboard/components/container/PageContainer";
-import Logo from "@/app/dashboard/layout/shared/logo/Logo";
-import AuthRegister from "../auth/AuthRegister";
+import Register from "../auth/Register";
+import Image from "next/image";
+import { useTheme } from '@mui/material/styles';
 
-const Register2 = () => (
-  <PageContainer title="Register" description="this is Register page">
-    <Box
-      sx={{
-        position: "relative",
-        "&:before": {
-          content: '""',
-          background: "radial-gradient(#d2f1df, #d3d7fa, #bad8f4)",
-          backgroundSize: "400% 400%",
-          animation: "gradient 15s ease infinite",
-          position: "absolute",
-          height: "100%",
-          width: "100%",
-          opacity: "0.3",
-        },
-      }}
-    >
-      <Grid
-        container
-        spacing={0}
-        justifyContent="center"
-        sx={{ height: "100vh" }}
+const Banner = styled(Box)(({ theme }) => ({
+  width: '100%',
+  background: theme.palette.primary.main,
+  color: '#fff',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  marginBottom: '28px',
+}));
+
+const Pill = styled(Chip)(({ theme }) => ({
+  padding: '10px 12px',
+  backgroundColor: 'rgba(255, 255, 255, 0.12)',
+  border: '1px solid rgba(255, 255, 255, 0.08)',
+  borderRadius: '20px',
+  color: '#fff',
+}));
+
+const Login = () => {
+  const theme = useTheme();
+
+  return (
+    <PageContainer title="Login" description="This is the login page">
+      <Stack 
+        direction="row" 
+        sx={{ 
+          width: '100%',
+          height: '100vh',
+          backgroundColor: 'white'
+        }}
       >
-        <Grid
-          item
-          xs={12}
-          sm={12}
-          lg={4}
-          xl={3}
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
+        {/* Left Section with Background Image */}
+        <Box 
+          sx={{ 
+            boxSizing:'border-box',
+            margin:'80px',
+            position: "relative", 
+            backgroundColor: "white", 
+            // height: "100vh", 
+            flex: 1 
+          }}
         >
-          <Card
-            elevation={9}
-            sx={{ p: 4, zIndex: 1, width: "100%", maxWidth: "500px" }}
+          <Box
+            sx={{
+            
+              width: "100%",
+              height: "100%",
+              backgroundColor: "secondary.light",
+              borderRadius: '20px',
+              backgroundImage: "url(/images/backgrounds/login-bg.svg)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
           >
-            <Box display="flex" alignItems="center" justifyContent="center">
-              <Logo />
-            </Box>
-            <AuthRegister
+
+          {/* Background Image */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              borderRadius: 2,
+            
+            }}
+          />
+
+          {/* Overlay Content */}
+          <Stack 
+            spacing={4} 
+            alignItems="center" 
+            justifyContent="space-evenly" 
+            sx={{ position: "absolute", width: "100%", height: "100%", display: "flex" }}
+          >
+            {/* Logo */}
+            <Image 
+              src="/images/logos/logo.svg" 
+              alt="Company Logo" 
+              width={103} 
+              height={22} 
+              style={{ flexShrink: 0 }}
+            />
+
+            {/* Center Image */}
+            <Image 
+              src="/images/login-left.svg" 
+              alt="Login Illustration" 
+              width={548} 
+              height={436} 
+              style={{ flexShrink: 0 }}
+            />
+
+            {/* Description Text */}
+            <Typography
+              sx={{
+                color: "rgba(17, 17, 17, 0.84)",
+                textAlign: "center",
+                fontSize: "32px",
+                fontStyle: "normal",
+                fontWeight: 600,
+                lineHeight: "120%", // 38.4px
+              }}
+            >
+              Effortless hiring processes <br /> and discovering top talents easily.
+            </Typography>
+          </Stack>
+          </Box>
+        </Box>
+
+        {/* Right Section */}
+        <Stack justifyContent="center" sx={{ flex: 1, height: "100vh", backgroundColor: "white" }}>
+          <Box sx={{ p: 4, width: "100%", maxWidth: 600, margin: "0 auto" }}>
+            {/* <Stack>
+              <Typography variant="h1" align="center" color="grey.100">Login to your Account</Typography>
+            </Stack> */}
+            <Register
+              title="Welcome to ElevateHR"
               subtext={
-                <Typography
-                  variant="subtitle1"
-                  textAlign="center"
-                  color="textSecondary"
-                  mb={1}
-                >
-                  Your Social Campaigns
+                <Typography variant="subtitle1" textAlign="center" color="grey.100" mb={'48px'}>
+                  Create an account for your Organization
                 </Typography>
               }
               subtitle={
-                <Stack
-                  direction="row"
-                  justifyContent="center"
-                  spacing={1}
-                  mt={3}
-                >
-                  <Typography
-                    color="textSecondary"
-                    variant="h6"
-                    fontWeight="400"
-                  >
-                    Already have an Account?
+                <Stack direction="row" spacing={1} justifyContent="center" mt={3}>
+                  <Typography color="06C680" variant="h6" fontWeight={500}>
+                    New to Spike?
                   </Typography>
                   <Typography
                     component={Link}
-                    href="/authentication/login"
-                    fontWeight="500"
-                    sx={{
-                      textDecoration: "none",
-                      color: "primary.main",
-                    }}
+                    href="/authentication/register"
+                    fontWeight={500}
+                    sx={{ textDecoration: "none", color: "primary.main" }}
                   >
-                    Sign In
+                    Create an account
                   </Typography>
                 </Stack>
               }
             />
-          </Card>
-        </Grid>
-      </Grid>
-    </Box>
-  </PageContainer>
-);
+          </Box>
+        </Stack>
+      </Stack>
+    </PageContainer>
+  );
+};
 
-export default Register2;
+export default Login;

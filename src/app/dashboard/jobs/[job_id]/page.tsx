@@ -52,16 +52,33 @@ const StyledButton = styled(Button)(({ theme }) => ({
   fontWeight: 500,
   lineHeight: '100%',
   letterSpacing: '0.16px',
+  transition: 'all 0.2s ease-in-out',
   '&:hover': {
-    backgroundColor: '#3333B3',
+    backgroundColor: 'rgba(3, 43, 68, 0.7)',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 4px 12px rgba(68, 68, 226, 0.15)',
   }
 }));
+
+interface JobData {
+  title: string;
+  description: string;
+  about_role: string;
+  responsibilities: string;
+  expectations: string;
+  benefits?: string;
+  location: string;
+  work_model: string;
+  job_type: string;
+  salary_min?: number;
+  salary_max?: number;
+}
 
 const JobDetailsPage = () => {
   const theme = useTheme();
   const { job_id } = useParams();
   const router = useRouter();
-  const [jobData, setJobData] = useState(null);
+  const [jobData, setJobData] = useState<JobData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -76,14 +93,13 @@ const JobDetailsPage = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('jwt');
-        const response = await axios.get(`https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${job_id}`, {
+        const response = await axios.get<{ data: JobData }>(`https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${job_id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          },
-          cache: 'no-store'
+          }
         });
-        setJobData(response.data);
+        setJobData(response.data.data);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching job details:', err);
@@ -180,7 +196,11 @@ const JobDetailsPage = () => {
               }}>
                 Who we are
               </Typography>
-              <Box sx={{ color: 'rgba(17, 17, 17, 0.84)' }} dangerouslySetInnerHTML={{ __html: jobData?.description }} />
+              <Box 
+                component="div"
+                sx={{ color: 'rgba(17, 17, 17, 0.84)' }} 
+                dangerouslySetInnerHTML={{ __html: jobData?.description || '' }} 
+              />
             </Box>
 
             <Box>
@@ -191,7 +211,11 @@ const JobDetailsPage = () => {
               }}>
                 About the Role
               </Typography>
-              <Box sx={{ color: 'rgba(17, 17, 17, 0.84)' }} dangerouslySetInnerHTML={{ __html: jobData?.about_role }} />
+              <Box 
+                component="div"
+                sx={{ color: 'rgba(17, 17, 17, 0.84)' }} 
+                dangerouslySetInnerHTML={{ __html: jobData?.about_role || '' }} 
+              />
             </Box>
 
             <Box>
@@ -202,7 +226,11 @@ const JobDetailsPage = () => {
               }}>
                 Job Responsibilities
               </Typography>
-              <Box sx={{ color: 'rgba(17, 17, 17, 0.84)' }} dangerouslySetInnerHTML={{ __html: jobData?.responsibilities }} />
+              <Box 
+                component="div"
+                sx={{ color: 'rgba(17, 17, 17, 0.84)' }} 
+                dangerouslySetInnerHTML={{ __html: jobData?.responsibilities || '' }} 
+              />
             </Box>
 
             <Box>
@@ -215,7 +243,7 @@ const JobDetailsPage = () => {
               </Typography>
               <Box sx={{ color: 'rgba(17, 17, 17, 0.84)' }}>
                 <List sx={{ margin: 0, paddingLeft: '16px' }}>
-                  {jobData?.expectations?.split('\n').map((expectation, index) => (
+                  {jobData?.expectations?.split('\n').map((expectation: string, index: number) => (
                     <ListItem key={index} sx={{ padding: '4px 0', display: 'list-item' }}>
                       <ListItemText 
                         primary={expectation}
@@ -243,7 +271,11 @@ const JobDetailsPage = () => {
                 }}>
                   Benefits
                 </Typography>
-                <Box sx={{ color: 'rgba(17, 17, 17, 0.84)' }} dangerouslySetInnerHTML={{ __html: jobData?.benefits }} />
+                <Box 
+                  component="div"
+                  sx={{ color: 'rgba(17, 17, 17, 0.84)' }} 
+                  dangerouslySetInnerHTML={{ __html: jobData?.benefits || '' }} 
+                />
               </Box>
             )}
           </Stack>

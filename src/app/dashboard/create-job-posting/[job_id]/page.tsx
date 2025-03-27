@@ -1,4 +1,4 @@
-   'use client';
+'use client';
 import React, { useState, useEffect } from 'react';
 import {
   Container,
@@ -13,6 +13,15 @@ import {
   InputLabel,
   InputAdornment,
   Skeleton,
+  Autocomplete,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  IconButton,
 } from '@mui/material';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
@@ -28,10 +37,12 @@ import { BorderStyle } from '@mui/icons-material';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
-import { generateInput } from '../../../../utils/openai';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, TextField, IconButton } from "@mui/material";
+import { generateInput, generateSkillsForRole } from '../../../../utils/openai';
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useTheme } from '@mui/material/styles';
+import CreatableSelect from 'react-select/creatable';
+import { ActionMeta, MultiValue, GroupBase } from 'react-select';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 const Banner = styled(Box)(({ theme }) => ({
   width: '100%',
@@ -91,13 +102,19 @@ const StyledStepLabel = styled(StepLabel)(({ theme }) => ({
 
 const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: '8px',
-  backgroundColor: '#032B44',
+  backgroundColor: theme.palette.primary.main,
   padding: '16px 44px',
-  color: 'rgba(205, 247, 235, 0.92)',
+  color: theme.palette.secondary.light,
   fontSize: '16px',
   fontWeight: 500,
   lineHeight: '100%',
   letterSpacing: '0.16px',
+  transition: 'all 0.2s ease-in-out',
+  '&:hover': {
+    backgroundColor: 'rgba(3, 43, 68, 0.7)',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 4px 12px rgba(68, 68, 226, 0.15)',
+  }
 }));
 
 const StyledOutlineButton = styled(Button)(({ theme }) => ({
@@ -108,9 +125,205 @@ const StyledOutlineButton = styled(Button)(({ theme }) => ({
   fontWeight: 500,
   lineHeight: '100%',
   letterSpacing: '0.16px',
+  transition: 'all 0.2s ease-in-out',
+  '&:hover': {
+    backgroundColor: 'rgba(68, 68, 226, 0.08)',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 4px 12px rgba(68, 68, 226, 0.1)',
+  }
 }));
 
-const TextEditor = ({ label, description, value, onChange, onRegenerate }) => {
+const StyledAutocomplete = styled(Autocomplete<string, true, false, true>)({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '8px',
+    border: '0.8px solid rgba(17, 17, 17, 0.14)',
+    '& fieldset': {
+      border: 'none'
+    }
+  },
+  '& .MuiChip-root': {
+    backgroundColor: '#4444E2',
+    color: '#fff',
+    borderRadius: '16px',
+    margin: '2px',
+    '& .MuiChip-deleteIcon': {
+      color: '#fff',
+      '&:hover': {
+        color: '#fff'
+      }
+    }
+  },
+  '& .MuiAutocomplete-listbox': {
+    maxHeight: '200px',
+  }
+});
+
+const StyledSelect = styled(CreatableSelect<SkillOption, true, GroupBase<SkillOption>>)({
+  '.select__control': {
+    borderRadius: '8px',
+    border: '0.8px solid rgba(17, 17, 17, 0.14)',
+    minHeight: '56px',
+    boxShadow: 'none',
+    '&:hover': {
+      borderColor: 'rgba(17, 17, 17, 0.24)',
+    },
+    '&--is-focused': {
+      borderColor: '#4444E2',
+      boxShadow: 'none',
+    }
+  },
+  '.select__multi-value': {
+    backgroundColor: '#4444E2',
+    borderRadius: '16px',
+    margin: '2px',
+    padding: '2px 8px',
+    color: '#fff',
+    '.select__multi-value__label': {
+      color: '#fff',
+    },
+    '.select__multi-value__remove': {
+      color: '#fff',
+      '&:hover': {
+        backgroundColor: 'transparent',
+        color: '#fff',
+      }
+    }
+  },
+  '.select__menu': {
+    zIndex: 2,
+    '.select__group-heading': {
+      color: 'rgba(17, 17, 17, 0.7)',
+      fontSize: '14px',
+      fontWeight: 500,
+      padding: '8px 12px',
+    },
+    '.select__option': {
+      '&--is-selected': {
+        backgroundColor: 'rgba(68, 68, 226, 0.08)',
+        color: '#111',
+      },
+      '&--is-focused': {
+        backgroundColor: 'rgba(68, 68, 226, 0.04)',
+      }
+    }
+  },
+  '.select__placeholder': {
+    color: 'rgba(17, 17, 17, 0.5)',
+  }
+});
+
+const FileUploadButton = styled(Button)({
+  backgroundColor: '#F8F9FB',
+  color: 'rgba(17, 17, 17, 0.84)',
+  padding: '16px',
+  borderRadius: '8px',
+  justifyContent: 'flex-start',
+  textTransform: 'none',
+  '&:hover': {
+    backgroundColor: '#F0F1F3',
+  },
+});
+
+interface SkillOption {
+  value: string;
+  label: string;
+}
+
+interface TextEditorProps {
+  label: string;
+  description: string;
+  value: string | undefined;
+  onChange: (value: string) => void;
+  onRegenerate?: () => void;
+}
+
+interface FieldProps {
+  label: string;
+  description: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  multiline?: boolean;
+  sx?: any;
+  error?: string;
+  placeholder?: string;
+}
+
+interface FormBuilderFieldProps {
+  field: {
+    key: string;
+    label: string;
+    type: string;
+    value?: string;
+    options?: string[];
+    required?: boolean;
+  };
+  index: number;
+  handleChange: (index: number, key: string, value: string, optionIndex?: number | null) => void;
+  handleDelete: (index: number, optionIndex?: number | null) => void;
+  handleTypeChange: (index: number, type: string) => void;
+  isRequired: boolean;
+}
+
+interface Assessment {
+  id: string;
+  title: string;
+  description: string;
+  // Add other assessment properties as needed
+}
+
+interface AssessmentStepProps {
+  assessments: Assessment[];
+  selectedAssessment: Assessment | null;
+  handleAssessmentChange: (assessment: Assessment | null) => void;
+}
+
+interface FormData {
+  title: string;
+  location: string;
+  work_model: string;
+  job_type: string;
+  description: string;
+  responsibilities: string;
+  expectations: string[];
+  salary_min: string;
+  salary_max: string;
+  salary_error: string;
+  level?: string;
+  skills: string[];
+  about_role: string;
+  [key: string]: any;
+}
+
+interface CustomField {
+  key: string;
+  type: string;
+  label: string;
+  value?: string;
+  options?: string[];
+  required?: boolean;
+  description?: string;
+}
+
+interface FormField {
+  key: string;
+  type: string;
+  label: string;
+  value?: string;
+  options?: string[];
+  required?: boolean;
+  description?: string;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
+const TextEditor: React.FC<TextEditorProps> = ({ label, description, value, onChange, onRegenerate }) => {
   const theme = useTheme();
   return (
     <>
@@ -141,7 +354,7 @@ const TextEditor = ({ label, description, value, onChange, onRegenerate }) => {
           </Typography>
         </Stack>
         <ReactQuill
-          value={value}
+          value={value || ''}
           onChange={onChange}
           style={{
             flex: 2, borderRadius: '8px',
@@ -154,7 +367,16 @@ const TextEditor = ({ label, description, value, onChange, onRegenerate }) => {
   );
 };
 
-const Field = ({ label, description, value, onChange, multiline = false, customStyle = {}, error = '', placeholder = '' }) => {
+const Field: React.FC<FieldProps> = ({
+  label,
+  description,
+  value,
+  onChange,
+  multiline = false,
+  sx = {},
+  error = '',
+  placeholder = ''
+}) => {
   const theme = useTheme();
   return (
     <>
@@ -187,9 +409,7 @@ const Field = ({ label, description, value, onChange, multiline = false, customS
           multiline={multiline}
           rows={multiline ? 4 : 1}
           style={{ marginLeft: 0, fontWeight: 700 }}
-          sx={{
-            ...customStyle,
-          }}
+          sx={sx}
           error={!!error}
           placeholder={placeholder}
         />
@@ -198,8 +418,16 @@ const Field = ({ label, description, value, onChange, multiline = false, customS
   );
 };
 
-const FormBuilderField = ({ field, index, handleChange, handleDelete, handleTypeChange, isRequired }) => {
+const FormBuilderField: React.FC<FormBuilderFieldProps> = ({
+  field,
+  index,
+  handleChange,
+  handleDelete,
+  handleTypeChange,
+  isRequired
+}) => {
   const theme = useTheme();
+  const isDefaultField = defaultCustomFields.some(df => df.key === field.key);
 
   return (
     <Stack alignItems="flex-start" width={'100%'} sx={{ padding: '20px 22px', border: '1px solid rgba(17, 17, 17, 0.14)', borderRadius: '8px' }}>
@@ -210,7 +438,7 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
             value={field.label}
             onChange={(e) => handleChange(index, 'label', e.target.value)}
             variant="outlined"
-            disabled={isRequired}
+            disabled={isRequired || isDefaultField}
             sx={{
               width: '100%',
               '& .MuiInputBase-root': {
@@ -231,12 +459,13 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
               }
             }}
           />
-          {!isRequired && (
+          {!isRequired && !isDefaultField && (
             <Stack direction={'row'} gap={2} alignItems={'center'}>
               <FormControl variant="outlined" style={{ minWidth: 150 }}>
                 <Select
                   value={field.type}
                   onChange={(e) => handleTypeChange(index, e.target.value)}
+                  disabled={isDefaultField}
                   sx={{
                     '& .MuiSelect-select': {
                       padding: '5px 8px',
@@ -261,25 +490,22 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
                   <MenuItem value="file">Attachment</MenuItem>
                 </Select>
               </FormControl>
-              <svg onClick={() => handleDelete(index)} cursor={'pointer'} width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M17.5 4.98332C14.725 4.70832 11.9333 4.56665 9.15 4.56665C7.5 4.56665 5.85 4.64998 4.2 4.81665L2.5 4.98332" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M7.08301 4.14175L7.26634 3.05008C7.39967 2.25841 7.49967 1.66675 8.90801 1.66675H11.0913C12.4997 1.66675 12.608 2.29175 12.733 3.05841L12.9163 4.14175" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M15.7087 7.6167L15.167 16.0084C15.0753 17.3167 15.0003 18.3334 12.6753 18.3334H7.32533C5.00033 18.3334 4.92533 17.3167 4.83366 16.0084L4.29199 7.6167" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M8.6084 13.75H11.3834" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M7.91699 10.4167H12.0837" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
+              <IconButton onClick={() => handleDelete(index)}>
+                <DeleteIcon />
+              </IconButton>
             </Stack>
           )}
         </Stack>
       </Stack>
+
       {field.type === 'text' && (
         <TextField
           fullWidth
-          value={field.value}
+          value={field.value || ''}
           onChange={(e) => handleChange(index, 'value', e.target.value)}
           variant="outlined"
           InputProps={{
-            readOnly: isRequired,
+            readOnly: isRequired || isDefaultField,
             autoFocus: true,
           }}
           placeholder="Response field"
@@ -307,26 +533,29 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
           }}
         />
       )}
+
       {field.type === 'select' && (
         <Stack width={'100%'} gap={1}>
-          {field.options.map((option, idx) => (
-            <Stack direction="row" alignItems="center" gap={1} key={idx}>
+          {(field.options || []).map((option, optionIndex) => (
+            <Stack key={optionIndex} direction={'row'} gap={1} alignItems={'center'}>
               <TextField
-                value={option}
-                onChange={(e) => handleChange(index, 'options', e.target.value, idx)}
+                fullWidth
+                value={option || ''}
+                onChange={(e) => handleChange(index, 'options', e.target.value, optionIndex)}
                 variant="outlined"
-                placeholder={`Enter option ${idx + 1}`}
-                disabled={isRequired}
+                placeholder="Option"
+                disabled={isDefaultField}
                 sx={{
-                  width: '100%',
+                  flex: 1,
                   '& .MuiInputBase-root': {
                     width: '100%',
-                    flex: 1,
                     backgroundColor: '#F4F4F6',
                     borderRadius: '6px',
                     border: "0.5px solid rgba(17, 17, 17, 0.08)",
                     '& input': {
                       width: '100%',
+                      borderRadius: '5px',
+                      backgroundColor: '#F4F4F6',
                       color: theme.palette.grey[100],
                       '&::placeholder': {
                         color: theme.palette.grey[100],
@@ -339,96 +568,190 @@ const FormBuilderField = ({ field, index, handleChange, handleDelete, handleType
                   }
                 }}
               />
-              {!isRequired && (
-                <IconButton size="small" onClick={() => handleDelete(index, idx)}>
-                  <svg cursor={'pointer'} width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M17.5 4.98332C14.725 4.70832 11.9333 4.56665 9.15 4.56665C7.5 4.56665 5.85 4.64998 4.2 4.81665L2.5 4.98332" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M7.08301 4.14175L7.26634 3.05008C7.39967 2.25841 7.49967 1.66675 8.90801 1.66675H11.0913C12.4997 1.66675 12.608 2.29175 12.733 3.05841L12.9163 4.14175" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M15.7087 7.6167L15.167 16.0084C15.0753 17.3167 15.0003 18.3334 12.6753 18.3334H7.32533C5.00033 18.3334 4.92533 17.3167 4.83366 16.0084L4.29199 7.6167" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M8.6084 13.75H11.3834" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M7.91699 10.4167H12.0837" stroke="#111111" stroke-opacity="0.84" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
+              {!isRequired && !isDefaultField && (
+                <IconButton onClick={() => handleDelete(index, optionIndex)}>
+                  <DeleteIcon />
                 </IconButton>
               )}
             </Stack>
           ))}
-          {!isRequired && (
-            <Button
-              startIcon={<AddIcon />}
-              onClick={() => handleChange(index, 'addOption')}
-              style={{ marginTop: '10px' }}
+          {!isRequired && !isDefaultField && (
+            <StyledOutlineButton
+              variant="outlined"
+              color="primary"
+              onClick={() => handleChange(index, 'options', '', (field.options || []).length)}
+              style={{ alignSelf: 'flex-start' }}
             >
               Add Option
-            </Button>
+            </StyledOutlineButton>
           )}
         </Stack>
       )}
+
       {field.type === 'file' && (
-        <TextField
-          fullWidth
-          value={field.value}
-          onChange={(e) => handleChange(index, 'value', e.target.value)}
-          variant="outlined"
-          placeholder="Attach file"
-          InputProps={{
-            readOnly: isRequired,
-            autoFocus: true,
-            startAdornment: (
-              <InputAdornment position="start">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M10.2754 10.1249L8.21706 12.1833C7.07539 13.3249 7.07539 15.1666 8.21706 16.3083C9.35872 17.4499 11.2004 17.4499 12.3421 16.3083L15.5837 13.0666C17.8587 10.7916 17.8587 7.0916 15.5837 4.8166C13.3087 2.5416 9.60872 2.5416 7.33372 4.8166L3.80039 8.34994C1.85039 10.2999 1.85039 13.4666 3.80039 15.4249" stroke="#111111" stroke-opacity="0.92" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            '& .MuiInputBase-root': {
-              backgroundColor: '#F4F4F6',
-              borderRadius: '6px',
-              border: "0.5px solid rgba(17, 17, 17, 0.08)",
-              '& input': {
-                color: theme.palette.grey[100],
-                '&::placeholder': {
-                  color: theme.palette.grey[100],
-                }
+        <Box sx={{ width: '100%' }}>
+          <Button
+            variant="outlined"
+            fullWidth
+            component="span"
+            startIcon={<AttachFileIcon />}
+            disabled={isDefaultField || isRequired}
+            sx={{
+              backgroundColor: '#F8F9FB',
+              color: 'rgba(17, 17, 17, 0.84)',
+              padding: '16px',
+              borderRadius: '8px',
+              justifyContent: 'flex-start',
+              textTransform: 'none',
+              '&:hover': {
+                backgroundColor: '#F0F1F3',
               },
-              '& fieldset': {
-                border: 'none',
-              }
-            }
-          }}
-        />
+            }}
+          >
+            Upload file
+          </Button>
+        </Box>
       )}
     </Stack>
   );
 };
 
-const AssessmentStep = ({ assessments, selectedAssessment, handleAssessmentChange }) => {
+const AssessmentStep: React.FC<AssessmentStepProps> = ({
+  assessments,
+  selectedAssessment,
+  handleAssessmentChange
+}) => {
+  const theme = useTheme();
+  
   return (
-    <Stack direction="row" spacing={3} alignItems="flex-start" marginBottom="20px" width={'100%'}>
-      <Stack spacing={1} minWidth={'280px'}>
-        <Typography variant="subtitle1">Add Assessment</Typography>
-        <Typography variant="body2" color="textSecondary">
-          Assessment for this role
-        </Typography>
-      </Stack>
-      <FormControl fullWidth>
-        <InputLabel>Select Assessment</InputLabel>
-        <Select
-          value={selectedAssessment}
-          onChange={(e) => handleAssessmentChange(e.target.value)}
-          label="Select Assessment"
+    <Stack spacing={3} width="100%" padding="28px">
+      {/* Info Banner */}
+      <Box
+        sx={{
+          width: '100%',
+          backgroundColor: 'rgba(68, 68, 226, 0.04)',
+          borderRadius: '8px',
+          padding: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}
+      >
+        <Typography
+          sx={{
+            color: theme.palette.grey[100],
+            fontSize: '14px',
+            fontWeight: 400,
+            lineHeight: '20px'
+          }}
         >
-          {assessments.map((assessment, index) => (
-            <MenuItem key={index} value={assessment}>
-              {assessment}
+          Only accepted applicants who have been moved to the assessment stage can access this
+        </Typography>
+      </Box>
+
+      {/* Assessment Selection */}
+      <Stack direction="row" spacing={3} alignItems="flex-start" width={'100%'}>
+        <Stack spacing={1} minWidth={'280px'}>
+          <Typography 
+            variant="subtitle1" 
+            sx={{
+              color: 'rgba(17, 17, 17, 0.92)',
+              fontSize: '20px',
+              fontWeight: 600,
+              lineHeight: '100%',
+              letterSpacing: '0.1px'
+            }}
+          >
+            Add Assessment
+          </Typography>
+          <Typography 
+            variant="body2" 
+            sx={{
+              color: 'rgba(17, 17, 17, 0.68)',
+              fontSize: '16px',
+              fontWeight: 400,
+              lineHeight: '100%',
+              letterSpacing: '0.16px'
+            }}
+          >
+            Assessment for this role
+          </Typography>
+        </Stack>
+        <FormControl fullWidth>
+          <Select
+            value={selectedAssessment?.id || ''}
+            onChange={(e) => {
+              const selected = assessments.find(a => a.id === e.target.value);
+              handleAssessmentChange(selected || null);
+            }}
+            displayEmpty
+            sx={{
+              borderRadius: '8px',
+              border: '0.8px solid rgba(17, 17, 17, 0.14)',
+              '& .MuiSelect-select': {
+                padding: '16px',
+                '&:focus': {
+                  backgroundColor: 'transparent'
+                }
+              },
+              '& .MuiOutlinedInput-notchedOutline': {
+                border: 'none'
+              }
+            }}
+          >
+            <MenuItem value="" disabled>
+              <Typography sx={{ color: 'rgba(17, 17, 17, 0.5)' }}>
+                Select from your list of assessments
+              </Typography>
             </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+            {assessments.map((assessment) => (
+              <MenuItem 
+                key={assessment.id} 
+                value={assessment.id}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: 'rgba(68, 68, 226, 0.04)'
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: 'rgba(68, 68, 226, 0.08)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(68, 68, 226, 0.12)'
+                    }
+                  }
+                }}
+              >
+                {assessment.title}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Stack>
     </Stack>
   );
 };
+
+const defaultCustomFields: CustomField[] = [
+  {
+    key: 'experience',
+    label: 'Years of Experience',
+    type: 'text',
+    required: true
+  },
+  {
+    key: 'skills',
+    label: 'Relevant Skills',
+    type: 'text',
+    required: true,
+    description: 'List your relevant skills for this position'
+  },
+  {
+    key: 'availability',
+    label: 'When can you start?',
+    type: 'select',
+    required: true,
+    options: ['Immediately', 'In 2 weeks', 'In a month', 'In 2 months']
+  }
+];
 
 const AboutTheJob = () => {
   const params = useParams();
@@ -438,7 +761,7 @@ const AboutTheJob = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     location: '',
     work_model: '',
@@ -446,25 +769,32 @@ const AboutTheJob = () => {
     description: '',
     responsibilities: '',
     expectations: [],
-    // salary: '',
     salary_min: '',
     salary_max: '',
-    salary_error: ''
+    salary_error: '',
+    skills: [],
+    about_role: '',
   });
 
-  const [formFields, setFormFields] = useState([]);
-  const [customFields, setCustomFields] = useState([]);
+  const [formFields, setFormFields] = useState<FormField[]>([]);
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedAssessment, setSelectedAssessment] = useState('');
+  const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [jobUrl, setJobUrl] = useState("");
-  const assessments = ['Assessment 1', 'Assessment 2', 'Assessment 3']; // Example assessments
+  const [technicalSkills, setTechnicalSkills] = useState<string[]>([]);
+  const [softSkills, setSoftSkills] = useState<string[]>([]);
+  const [customSkills, setCustomSkills] = useState<string[]>([]);
+  const assessments: Assessment[] = [
+    { id: 'Assessment 1', title: 'Assessment 1', description: 'Description for Assessment 1' },
+    { id: 'Assessment 2', title: 'Assessment 2', description: 'Description for Assessment 2' },
+    { id: 'Assessment 3', title: 'Assessment 3', description: 'Description for Assessment 3' }
+  ];
 
-  // Fetch job details on component mount
   useEffect(() => {
     const fetchJobDetails = async () => {
       if (!jobId) {
-        setError('No job ID provided');
+        setError('No job ID provided' as any);
         setLoading(false);
         return;
       }
@@ -477,42 +807,57 @@ const AboutTheJob = () => {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          },
-          cache: 'no-store'
+          }
         });
         const jobData = response.data;
         if (!jobData.description.length) {
-          const aiSuggestions = await generateInput({ jobTitle: jobData.title, jobLevel: jobData.level, field: '' })
+          const aiSuggestions = await generateInput({ jobTitle: jobData.title, jobLevel: jobData.level, field: '' });
           const expectations = aiSuggestions.expectations;
           if (expectations[0] === '') expectations.shift();
+
+          // Generate skills based on the job title and description
+          const skills = await generateSkillsForRole(jobData.title, aiSuggestions.aboutTheRole);
+
+          // Combine all skills into one list
+          const allSkills = [...skills.technical, ...skills.soft];
+          setTechnicalSkills(allSkills);
+          setSoftSkills([]);
+          setCustomSkills([]);
+
           setFormData({
             ...jobData,
-            expectations: jobData.expectations.split('|||') || [],
+            expectations: expectations || [],
             about_role: aiSuggestions.aboutTheRole || '',
             responsibilities: aiSuggestions.jobResponsibilities || '',
             description: aiSuggestions.aboutTheRole || '',
             salary_min: jobData.salary_min || '',
-            salary_max: jobData.salary_max || ''
-          })
-          setCustomFields(jobData.application_form.custom_fields || []);
-          setFormFields(jobData.application_form.required_fields || []);
+            salary_max: jobData.salary_max || '',
+            skills: allSkills.slice(0, 6)
+          });
+          // Only set default custom fields if no custom fields exist in job data
+          setCustomFields(jobData.application_form?.custom_fields?.length ? jobData.application_form.custom_fields : defaultCustomFields);
+          setFormFields(jobData.application_form?.required_fields || []);
           setLoading(false);
-          return
+          return;
         }
 
-        setCustomFields(jobData.application_form.custom_fields || []);
+        const existingExpectations = jobData.expectations.split('|||') || [];
+
         setFormData({
           ...jobData,
-          expectations: jobData.expectations.split('|||') || [],
+          expectations: existingExpectations,
           salary_min: jobData.salary_min || '',
-          salary_max: jobData.salary_max || ''
+          salary_max: jobData.salary_max || '',
+          skills: jobData.skills.split(',')
         });
-        setFormFields(jobData.application_form.required_fields || []);
+        // Only set default custom fields if no custom fields exist in job data
+        setCustomFields(jobData.application_form?.custom_fields?.length ? jobData.application_form.custom_fields : defaultCustomFields);
+        setFormFields(jobData.application_form?.required_fields || []);
 
         setLoading(false);
       } catch (err) {
         console.error('Error fetching job details:', err);
-        setError('Failed to fetch job details. Please try again later.');
+        setError('Failed to fetch job details. Please try again later.' as any);
         setLoading(false);
       }
     };
@@ -520,20 +865,39 @@ const AboutTheJob = () => {
     fetchJobDetails();
   }, [jobId]);
 
-  const handleChange = (field) => (value) => {
-    setFormData((prevData) => ({
+  const handleChange = (field: string, value: string) => {
+    setFormData(prevData => ({
       ...prevData,
-      [field]: value,
+      [field]: value
     }));
   };
 
-  const handleRegenerate = (field) => async () => {
+  type RegenerateField = 'aboutTheRole' | 'jobResponsibilities' | 'expectations';
+
+  const handleRegenerate = (field: RegenerateField) => async () => {
     try {
-      const aiSuggestions = await generateInput({ jobTitle: formData.title, jobLevel: formData.level, field: field })
-      setFormData(prevData => ({
-        ...prevData,
-        [field === 'aboutTheRole' ? 'about_role' : field === 'jobResponsibilities' ? 'responsibilities' : 'expectations']: aiSuggestions[field] || prevData[field]
-      }));
+      const aiSuggestions = await generateInput({
+        jobTitle: formData.title,
+        jobLevel: formData.level || '',
+        field: field
+      });
+
+      if (field === 'expectations') {
+        // Generate new skills for regenerated expectations
+        const skills = await generateSkillsForRole(formData.title, formData.description);
+        const allSkills = [...skills.technical, ...skills.soft];
+
+        setFormData(prevData => ({
+          ...prevData,
+          expectations: aiSuggestions.expectations,
+          skills: allSkills
+        }));
+      } else {
+        setFormData(prevData => ({
+          ...prevData,
+          [field === 'aboutTheRole' ? 'about_role' : 'responsibilities']: aiSuggestions[field] || prevData[field]
+        }));
+      }
     } catch (err) {
       console.error(`Error regenerating ${field}:`, err);
     }
@@ -546,77 +910,68 @@ const AboutTheJob = () => {
     }));
   };
 
-  const addField = (type = 'text') => {
+  const addField = () => {
     setCustomFields([
       ...customFields,
       {
-        key: `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        type,
+        key: `custom_${customFields.length + 1}`,
+        type: 'text',
         label: '',
-        description: '',
         value: '',
-        options: type === 'select' ? ['', ''] : []
+        options: [],
+        required: false,
+        description: ''
       }
     ]);
   };
 
-  const handleFieldChange = (index, key, value, optionIndex = null) => {
-    setCustomFields((prevFields) =>
-      prevFields.map((field, idx) => {
-        if (idx === index) {
-          if (key === 'options' && optionIndex !== null) {
-            return {
-              ...field,
-              options: field.options.map((opt, i) => (i === optionIndex ? value : opt)),
-            };
-          } else if (key === 'addOption') {
-            return {
-              ...field,
-              options: [...field.options, ''],
-            };
-          } else {
-            return { ...field, [key]: value };
-          }
-        }
-        return field;
-      })
-    );
+  const handleFieldChange = (index: number, key: string, value: string, optionIndex?: number | null) => {
+    if (optionIndex !== null && optionIndex !== undefined) {
+      const updatedFields = [...customFields];
+      if (!updatedFields[index].options) {
+        updatedFields[index].options = [];
+      }
+      updatedFields[index].options![optionIndex] = value;
+      setCustomFields(updatedFields);
+    } else {
+      const updatedFields = [...customFields];
+      updatedFields[index] = {
+        ...updatedFields[index],
+        [key]: value
+      };
+      setCustomFields(updatedFields);
+    }
   };
 
-  const handleTypeChange = (index, type) => {
-    setCustomFields((prevFields) =>
-      prevFields.map((field, idx) => {
-        if (idx === index) {
-          field.type = type;
-          if (type === 'select' && !field?.options?.length) {
-            field.options = ['', ''];
-          } else if (type !== 'select') {
-            field.options = [];
-          }
-        }
-        return field;
-      })
-    );
+  const handleTypeChange = (index: number, type: string) => {
+    const updatedFields = [...customFields];
+    updatedFields[index] = {
+      ...updatedFields[index],
+      type,
+      options: type === 'select' ? ['', ''] : [],
+      value: ''
+    };
+    setCustomFields(updatedFields);
   };
 
-  const handleDeleteField = (index, optionIndex = null) => {
+  const handleDeleteField = (index: number, optionIndex: number | null = null) => {
     setCustomFields((prevFields) =>
       prevFields.map((field, idx) => {
         if (idx === index) {
           if (optionIndex !== null) {
             return {
               ...field,
-              options: field.options.filter((_, optIdx) => optIdx !== optionIndex),
+              options: field.options?.filter((_, optIdx) => optIdx !== optionIndex) || []
             };
           }
           return null; // This will be filtered out below
         }
         return field;
-      }).filter(field => field !== null)
+      }).filter((field): field is CustomField => field !== null)
     );
   };
 
-  const handleAssessmentChange = (assessment) => {
+  const handleAssessmentChange = (assessment: Assessment | null) => {
     setSelectedAssessment(assessment);
   };
 
@@ -628,7 +983,7 @@ const AboutTheJob = () => {
   const handleSalaryChange = (value: string) => {
     // Remove any non-numeric characters except dash
     const cleanValue = value.replace(/[^\d-]/g, '');
-    
+
     // Only allow one dash
     if (cleanValue.split('-').length > 2) {
       return;
@@ -648,7 +1003,7 @@ const AboutTheJob = () => {
 
   const formatSalaryDisplay = (value: string) => {
     if (!value) return '';
-    
+
     const parts = value.split('-');
     if (parts.length === 1) {
       // Single number
@@ -665,6 +1020,14 @@ const AboutTheJob = () => {
     }
   };
 
+  const handleSkillsChange = (newValue: string[]) => {
+    // setTechnicalSkills(newValue);
+    setFormData(prev => ({
+      ...prev,
+      skills: newValue
+    }));
+  };
+
   const handleDone = async () => {
     // Collate all the data
     const collatedData = {
@@ -677,7 +1040,7 @@ const AboutTheJob = () => {
         value: field.value,
         options: field.options
       })),
-      selectedAssessment,
+      selectedAssessment: selectedAssessment?.id,
       expectations: formData.expectations.join('|||'),
       salary_min: parseInt(formData.salary_min.replace(/,/g, '')) || 0,
       salary_max: parseInt(formData.salary_max.replace(/,/g, '')) || 0
@@ -692,21 +1055,12 @@ const AboutTheJob = () => {
 
     try {
       const token = localStorage.getItem("jwt");
-
       const response = await axios.put(
         `https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${jobId}`,
         {
           ...collatedData,
-          job_type: "fulltime",
-          availability: "week",
-          skills: "php,css",
           experience_years: "5 years",
-          qualifications: 'Senior',
-          current_role: "jnr dev",
-          work_preference: "remote",
-          start_date: "immediately",
-          address: "34 Ellasan",
-          github_profile: "https://www.linkedin.com"
+          qualifications: formData.level
         },
         {
           headers: {
@@ -717,14 +1071,20 @@ const AboutTheJob = () => {
       );
 
       // Construct the job URL
-      const jobUrl = `http://localhost:3000/dashboard/applicant/${jobId}`;
+      const jobUrl = `${process.env.NEXT_PUBLIC_HOST}/dashboard/job-openings/${jobId}`;
       setJobUrl(jobUrl);
       setShowDialog(true);
 
       console.log("Success:", response.data);
     } catch (error) {
-      console.error("Error updating job post:", error.response?.data || error.message);
-      alert(`Failed to update job post: ${error.response?.data?.message || "Unknown error"}`);
+      const apiError = error as ApiError;
+      console.error(
+        "Error updating job post:",
+        apiError.response?.data || apiError.message || "Unknown error"
+      );
+      alert(
+        `Failed to update job post: ${apiError.response?.data?.message || apiError.message || "Unknown error"}`
+      );
     }
   };
 
@@ -738,7 +1098,7 @@ const AboutTheJob = () => {
   // Redirect function
   const handleCloseDialog = () => {
     setShowDialog(false);
-    window.location.href = "http://localhost:3000/dashboard";
+    window.location.href = `${process.env.NEXT_PUBLIC_HOST}/dashboard`;
   };
 
   const renderStepContent = () => {
@@ -772,11 +1132,12 @@ const AboutTheJob = () => {
               label="Job Title"
               description="A descriptive job title."
               value={formData.title}
-              onChange={(e) => handleChange('title')(e.target.value)}
-              customStyle={{
+              onChange={(e) => handleChange('title', e.target.value)}
+              sx={{
                 '& .MuiInputBase-root': {
                   '& input': {
-                    fontSize: '24px !important', color: 'rgba(17, 17, 17, 0.92)',
+                    fontSize: '24px !important',
+                    color: 'rgba(17, 17, 17, 0.92)',
                     fontWeight: 600,
                     lineHeight: '100%',
                     letterSpacing: '0.12px',
@@ -794,14 +1155,14 @@ const AboutTheJob = () => {
               label="About the Role"
               description="More information on the role."
               value={formData.about_role}
-              onChange={handleChange('about_role')}
+              onChange={(value) => handleChange('about_role', value)}
               onRegenerate={handleRegenerate('aboutTheRole')}
             />
             <TextEditor
               label="Job Responsibilities"
               description="What you will do in this role."
               value={formData.responsibilities}
-              onChange={handleChange('responsibilities')}
+              onChange={(value) => handleChange('responsibilities', value)}
               onRegenerate={handleRegenerate('jobResponsibilities')}
             />
             <Stack spacing={1} marginBottom="10px" direction="row" padding="28px 24px">
@@ -870,7 +1231,7 @@ const AboutTheJob = () => {
               onChange={(e) => handleSalaryChange(e.target.value)}
               error={formData.salary_error}
               placeholder="50,000-100,000"
-              customStyle={{
+              sx={{
                 '& .MuiInputBase-root': {
                   '& fieldset': {
                     borderRadius: '8px',
@@ -879,13 +1240,69 @@ const AboutTheJob = () => {
                 },
               }}
             />
+            <Divider />
+            <Stack direction="row" spacing={3} alignItems="flex-start" padding="28px 24px">
+              <Stack spacing={1} minWidth={'280px'}>
+                <Typography variant="subtitle1" sx={{
+                  color: 'rgba(17, 17, 17, 0.92)',
+                  fontSize: '20px',
+                  fontStyle: 'normal',
+                  fontWeight: 600,
+                  lineHeight: '100%',
+                  letterSpacing: '0.1px',
+                }}>Skills Required</Typography>
+                <Typography sx={{
+                  color: 'rgba(17, 17, 17, 0.68)',
+                  fontSize: '16px',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  lineHeight: '100%',
+                  letterSpacing: '0.16px',
+                }} variant="body2" color="textSecondary">
+                  Select or add required skills for this role
+                </Typography>
+              </Stack>
+              <Box sx={{ width: '100%' }}>
+                <StyledSelect
+                  isMulti
+                  value={formData.skills.map(skill => ({ value: skill, label: skill }))}
+                  onChange={(newValue: MultiValue<SkillOption>) => {
+                    const selectedSkills = newValue ? newValue.map((option: SkillOption) => option.value) : [];
+                    handleSkillsChange(selectedSkills);
+                  }}
+                  options={[
+                    {
+                      label: 'Skills',
+                      options: technicalSkills.map(skill => ({
+                        value: skill,
+                        label: skill
+                      }))
+                    }
+                  ]}
+                  placeholder="Select or type to add new skills"
+                  noOptionsMessage={({ inputValue }: { inputValue: string }) => inputValue ? "Press enter to add this skill" : "No skills available"}
+                  formatCreateLabel={(inputValue: string) => `Add "${inputValue}" as a new skill`}
+                  onCreateOption={(inputValue: string) => {
+                    const newSkill = inputValue.trim();
+                    if (newSkill) {
+                      const updatedSkills = [...formData.skills, newSkill];
+                      handleSkillsChange(updatedSkills);
+                      // setTechnicalSkills(prev => [...prev, newSkill]);
+                    }
+                  }}
+                  classNamePrefix="select"
+                  maxMenuHeight={300}
+                />
+              </Box>
+            </Stack>
+            <Divider />
           </>
         );
       case 2:
         return (
           <Stack padding="28px" gap={'12px'}>
             {/* Display required fields */}
-            {formFields.map((field, index) => (
+            {formFields.map((field: FormField, index) => (
               <FormBuilderField
                 key={`required-${index}`}
                 field={field.type === 'email' || field.type === 'url' ? { ...field, type: 'text' } : field}
@@ -896,7 +1313,7 @@ const AboutTheJob = () => {
                 isRequired={true}
               />
             ))}
-            
+
             {/* Display custom fields */}
             {customFields.map((field, index) => (
               <FormBuilderField
@@ -945,7 +1362,7 @@ const AboutTheJob = () => {
       }} height={'204px'} display={'flex'} flexDirection={'column'} alignItems={'center'} justifyContent={'center'}>
         {loading ? (
           <Stack spacing={2} alignItems="center">
-            <Skeleton variant="text" width="120%"  height={40}  />
+            <Skeleton variant="text" width="120%" height={40} />
             {/* <Skeleton variant="text" width="40%" /> */}
             <Stack direction="row" spacing={2} justifyContent="center">
               <Skeleton variant="rounded" width={100} height={30} />
@@ -960,8 +1377,9 @@ const AboutTheJob = () => {
               textAlign: "center",
               fontSize: "40px",
               fontWeight: "600",
-              lineHeight: "100%"
-            }}>{formData.title}</Typography>
+              lineHeight: "100%",
+              textTransform: 'capitalize'
+            }}>{formData.level} {formData.title}</Typography>
             <Stack mt={2} direction={'row'} alignItems={'center'} justifyContent={'center'} gap={'8px'}>
               <Pill label={formData.location} />
               <Pill label={formData.work_model} />
@@ -1015,10 +1433,9 @@ const AboutTheJob = () => {
               )}
               <StyledButton
                 variant="contained"
-                // color="primary"
                 onClick={() => setCurrentStep((prev) => Math.min(prev + 1, 3))}
-                style={{ alignSelf: 'flex-end', marginTop: '20px' }}
-                
+                sx={{ alignSelf: 'flex-end', marginTop: '20px', backgroundColor: theme.palette.primary.main, color: 'secondary.light', '&:hover': { backgroundColor: theme.palette.primary.main, color: 'secondary.light' } }}
+
               >
                 Next
               </StyledButton>
