@@ -287,7 +287,7 @@ const EmailTemplatePage = () => {
                       },
                       '&.Mui-selected': {
                         bgcolor: theme.palette.secondary.light,
-                        borderLeft: '3px solid #4444E2',
+                        borderLeft: `3px solid ${theme.palette.secondary.main}`,
                         '&:hover': {
                           bgcolor: theme.palette.secondary.light,
                         }
