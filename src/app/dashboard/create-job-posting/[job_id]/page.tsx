@@ -111,7 +111,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   letterSpacing: '0.16px',
   transition: 'all 0.2s ease-in-out',
   '&:hover': {
-    backgroundColor: 'rgba(3, 43, 68, 0.7)',
+    backgroundColor: '#6666E6',
     transform: 'translateY(-1px)',
     boxShadow: '0 4px 12px rgba(68, 68, 226, 0.15)',
   }
@@ -1071,7 +1071,7 @@ const AboutTheJob = () => {
       );
 
       // Construct the job URL
-      const jobUrl = `${process.env.NEXT_PUBLIC_HOST}/dashboard/job-openings/${jobId}`;
+      const jobUrl = `${process.env.NEXT_PUBLIC_HOST}/job-openings/${jobId}`;
       setJobUrl(jobUrl);
       setShowDialog(true);
 

@@ -57,7 +57,7 @@ const PrimaryButton = styled(Button)(({ theme }) => ({
   height: '52px',
   transition: 'all 0.2s ease-in-out',
   '&:hover': {
-    backgroundColor: 'rgba(3, 43, 68, 0.7)',
+    backgroundColor: '#6666E6',
     transform: 'translateY(-1px)',
     boxShadow: '0 4px 12px rgba(68, 68, 226, 0.15)',
   },
@@ -287,7 +287,7 @@ const EmailTemplatePage = () => {
                       },
                       '&.Mui-selected': {
                         bgcolor: theme.palette.secondary.light,
-                        borderLeft: `3px solid ${theme.palette.secondary.main}`,
+                        borderLeft: '3px solid #4444E2',
                         '&:hover': {
                           bgcolor: theme.palette.secondary.light,
                         }

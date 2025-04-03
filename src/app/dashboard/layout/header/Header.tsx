@@ -45,7 +45,7 @@ const Header = () => {
     display: "flex",
     justifyContent: "space-between",
     padding: "0 20px",
-    maxWidth:'1536px',
+    maxWidth:'1440px',
     margin:'auto',
     // [theme.breakpoints.up("lg")]: {
     //   padding: "0 80px",
@@ -54,15 +54,15 @@ const Header = () => {
   
   const ProfileButtonStyled = styled(Button)(({ theme }) => ({
     width: "100%",
-    backgroundColor: theme.palette.secondary.light,
+    backgroundColor: 'rgba(11, 18, 213, 0.12)',
     color: theme.palette.grey[600],
     borderRadius: "50px",
-    border: `1.2px solid ${theme.palette.secondary.dark}`,
+    border: `1px solid rgba(11, 18, 213, 0.40)`,
     display: "flex",
     gap: '10px',
     transition: 'all 0.2s ease-in-out',
     '&:hover': {
-      backgroundColor: theme.palette.secondary.light,
+      backgroundColor: 'rgba(11, 18, 213, 0.18)',
       transform: 'translateY(-1px)',
       boxShadow: '0 4px 12px rgba(11, 18, 213, 0.1)',
     }
@@ -81,7 +81,7 @@ const Header = () => {
     }
   }));
 
-  const links = [{ href: "/dashboard", title: "Dashboard" }, { href: "/dashboard/applications", title: "Applications" }, { href: "/notifications", title: "Notifications" }];
+  const links = [{ href: "/dashboard", title: "Dashboard" }, { href: "/dashboard/applications", title: "Applications" }, { href: "/dashboard/job-listings", title: "Job Listings" }];
   return (
     <AppBarStyled position="sticky" color="default">
 

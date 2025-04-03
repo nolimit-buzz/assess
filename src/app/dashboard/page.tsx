@@ -164,7 +164,7 @@ const PrimaryButton = styled(Button)(({ theme }) => ({
   height: '52px',
   transition: 'all 0.2s ease-in-out',
   '&:hover': {
-    backgroundColor: 'rgba(3, 43, 68, 0.7)',
+    backgroundColor: '#6666E6',
     transform: 'translateY(-1px)',
     boxShadow: '0 4px 12px rgba(68, 68, 226, 0.15)',
   },
@@ -225,7 +225,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   color: '#FFF',
   transition: 'all 0.2s ease-in-out',
   '&:hover': {
-    background: 'rgba(3, 43, 68, 0.7)',
+    background: '#6666E6',
     transform: 'translateY(-1px)',
     boxShadow: '0 4px 12px rgba(68, 68, 226, 0.15)',
   },
@@ -581,14 +581,25 @@ const Dashboard = () => {
                 sx={{ bgcolor: "#f2f4f6", "& .MuiOutlinedInput-root": { borderColor: "#d7dadf", borderWidth: "0.5px" } }}
               />
             </Stack>
-            <PrimaryButton
+            <Button
               variant="contained"
               fullWidth
+              sx={{
+                color: "secondary.light",
+                mt: 2,
+                py: 2,
+                bgcolor: "primary.main",
+                borderRadius: 2,
+                textTransform: "none",
+                "&:hover": {
+                  bgcolor: "primary.main",
+                },
+              }}
               onClick={handleSubmit}
               disabled={isSubmitting}
             >
               {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Create Job'}
-            </PrimaryButton>
+            </Button>
           </Stack>
         </DialogContent>
       </StyledDialog>

@@ -816,7 +816,7 @@ export default function ApplicantDetails() {
                       bgcolor: 'primary.main',
                       transition: 'all 0.2s ease-in-out',
                       '&:hover': {
-                        bgcolor: 'rgba(3, 43, 68, 0.7)',
+                        bgcolor: '#6666E6',
                         transform: 'translateY(-1px)',
                         boxShadow: '0 4px 12px rgba(68, 68, 226, 0.15)',
                       }
