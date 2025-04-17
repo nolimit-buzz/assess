@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -651,11 +651,10 @@ const ProfilePage = () => {
   };
 
   // Function to fetch Calendly events
-  const fetchCalendlyEvents = async () => {
+  const fetchCalendlyEvents = useCallback(async () => {
     try {
       setLoadingEvents(true);
       const accessToken = await getCalendlyAccessToken();
-      console.log('accessToken', accessToken);
       
       // First get the user profile
       const userResponse = await fetch('https://api.calendly.com/users/me', {
@@ -697,17 +696,13 @@ const ProfilePage = () => {
     } finally {
       setLoadingEvents(false);
     }
-  };
+  }, [getCalendlyAccessToken, setCalendlyEvents, setNotification, setLoadingEvents]);
 
-  // Fetch events when Calendly tab is active
   useEffect(() => {
-  console.log('activeSection', activeSection);
-  console.log('integrations.calendly.connected', integrations);
     if (activeSection === 'calendly' && integrations.calendly.connected) {
-    console.log('fetching calendly events');
       fetchCalendlyEvents();
     }
-  }, [activeSection, integrations.calendly.connected]);
+  }, [activeSection, integrations.calendly.connected, fetchCalendlyEvents]);
 
   if (loading) {
     return (
@@ -1391,35 +1386,8 @@ const ProfilePage = () => {
                       {!integrations.calendly.connected && (
                         <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)', borderRadius: '8px' }}>
                           <Typography variant="body2" sx={{ color: 'text.grey.100', mb: 1 }}>
-                            To connect Calendly, you'll need to:
+                            You&apos;re all set! Your Calendly account is connected.
                           </Typography>
-                          <Box component="ol" sx={{ pl: 2, mb: 0 }}>
-                            <Typography component="li" variant="body2" sx={{ color: 'text.grey.100', mb: 1 }}>
-                              Create a Calendly developer account at{' '}
-                              <Link href="https://developer.calendly.com/" target="_blank" rel="noopener noreferrer" sx={{ color: 'primary.main' }}>
-                                developer.calendly.com
-                              </Link>
-                            </Typography>
-                            <Typography component="li" variant="body2" sx={{ color: 'text.grey.100', mb: 1 }}>
-                              Create an OAuth application and whitelist this domain:
-                              <Box component="code" sx={{ 
-                                display: 'block', 
-                                mt: 1, 
-                                p: 1, 
-                                bgcolor: 'rgba(0, 0, 0, 0.04)', 
-                                borderRadius: '4px',
-                                fontFamily: 'monospace'
-                              }}>
-                                {window.location.origin}
-                              </Box>
-                            </Typography>
-                            <Typography component="li" variant="body2" sx={{ color: 'text.grey.100' }}>
-                              Send your Client ID and Secret to{' '}
-                              <Link href="mailto:info@nolimitbuzz.net" sx={{ color: 'primary.main' }}>
-                                info@nolimitbuzz.net
-                              </Link>
-                            </Typography>
-                          </Box>
                         </Box>
                       )}
                     </Paper>

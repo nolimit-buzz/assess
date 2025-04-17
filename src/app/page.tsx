@@ -243,7 +243,7 @@ const Login = () => {
                       fontSize: { xs: '12px', sm: '16px' }
                     }}
                   >
-                  Don't have an account?
+                    Don&apos;t have an account?
                   </Typography>
                   <Typography
                     component={Link}
@@ -262,7 +262,7 @@ const Login = () => {
               onSuccess={(response) => {
                 if (typeof window !== 'undefined') {
                   // Save token
-                  localStorage.setItem('token', response.token);
+                  localStorage.setItem('jwt', response.token);
                   
                   // Save user profile data
                   localStorage.setItem('userProfile', JSON.stringify({
@@ -276,6 +276,9 @@ const Login = () => {
                 }
               }}
             />
+            <Typography variant="body2" sx={{ color: 'text.grey.100', mb: 1 }}>
+              We&apos;re excited to have you here!
+            </Typography>
           </Box>
         </Stack>
       </Stack>

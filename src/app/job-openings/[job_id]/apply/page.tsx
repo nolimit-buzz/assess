@@ -36,6 +36,7 @@ import Progress from "@/app/dashboard/layout/progress";
 import axios from "axios";
 import { CheckCircle, Close } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
+import Image from 'next/image';
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
@@ -393,8 +394,22 @@ export default function Typeform({
               whiteSpace: 'normal'
             }}
           >
-            Your application is in! We'll review it and get back to you via email.
+            Your application is in! We&apos;ll review it and get back to you via email.
           </Typography>
+          <Box sx={{ display: 'flex', marginBottom: '24px' }}>
+            <Image
+              src="/assets/thankyou.gif"
+              alt="Completed"
+              width={200}
+              height={200}
+              style={{
+                width: '50%',
+                height: 'auto',
+                margin: '0 auto',
+                borderRadius: '8px'
+              }}
+            />
+          </Box>
         </DialogContent>
         <DialogActions sx={{ 
           justifyContent: 'center', 
