@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -650,26 +650,64 @@ const ProfilePage = () => {
     }
   };
 
-  const fetchCalendlyEvents = useCallback(async () => {
+  // Function to fetch Calendly events
+  const fetchCalendlyEvents = async () => {
     try {
-      const response = await fetch('/api/calendly/events', {
-        method: 'GET',
+      setLoadingEvents(true);
+      const accessToken = await getCalendlyAccessToken();
+      console.log('accessToken', accessToken);
+      
+      // First get the user profile
+      const userResponse = await fetch('https://api.calendly.com/users/me', {
         headers: {
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
       });
-      const data = await response.json();
-      setCalendlyEvents(data.events);
+
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch user profile');
+      }
+
+      const userData = await userResponse.json();
+      const userUri = userData.resource.uri;
+      const userUuid = userUri.split('/').pop(); // Extract UUID from URI
+
+      // Then fetch events using the user's UUID
+      const eventsResponse = await fetch(`https://api.calendly.com/scheduled_events?user=${userUuid}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!eventsResponse.ok) {
+        throw new Error('Failed to fetch events');
+      }
+
+      const eventsData = await eventsResponse.json();
+      setCalendlyEvents(eventsData.collection || []);
     } catch (error) {
       console.error('Error fetching Calendly events:', error);
+      setNotification({
+        open: true,
+        message: 'Failed to fetch Calendly events',
+        severity: 'error',
+      });
+    } finally {
+      setLoadingEvents(false);
     }
-  }, []);
+  };
 
+  // Fetch events when Calendly tab is active
   useEffect(() => {
+  console.log('activeSection', activeSection);
+  console.log('integrations.calendly.connected', integrations);
     if (activeSection === 'calendly' && integrations.calendly.connected) {
+    console.log('fetching calendly events');
       fetchCalendlyEvents();
     }
-  }, [activeSection, integrations.calendly.connected, fetchCalendlyEvents]);
+  }, [activeSection, integrations.calendly.connected]);
 
   if (loading) {
     return (
@@ -1353,7 +1391,7 @@ const ProfilePage = () => {
                       {!integrations.calendly.connected && (
                         <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)', borderRadius: '8px' }}>
                           <Typography variant="body2" sx={{ color: 'text.grey.100', mb: 1 }}>
-                            You&apos;ll need to create a Calendly developer account and set up an OAuth application.
+                            To connect Calendly, you'll need to:
                           </Typography>
                           <Box component="ol" sx={{ pl: 2, mb: 0 }}>
                             <Typography component="li" variant="body2" sx={{ color: 'text.grey.100', mb: 1 }}>

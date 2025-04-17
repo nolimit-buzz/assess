@@ -393,7 +393,7 @@ export default function Typeform({
               whiteSpace: 'normal'
             }}
           >
-            Your application is in! We&apos;ll review it and get back to you via email.
+            Your application is in! We'll review it and get back to you via email.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ 

@@ -22,7 +22,6 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import SchoolIcon from "@mui/icons-material/School";
 import WorkIcon from "@mui/icons-material/Work";
-import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -278,16 +277,7 @@ const JobDetailsPage = () => {
           position: "relative",
         }}
         height={"304px"}
-      >
-        <p>You&apos;re viewing the job details for this position.</p>
-        <Image 
-          src="/path/to/image.jpg" 
-          alt="Job image" 
-          width={500} 
-          height={300}
-          style={{ width: '100%', height: 'auto' }}
-        />
-      </Banner>
+      ></Banner>
 
       <Container
         sx={{
@@ -327,7 +317,7 @@ const JobDetailsPage = () => {
                       marginBottom: "14px",
                     }}
                   >
-                    We&apos;re looking for a ...
+                    We're looking for a ...
                   </Typography>
                   <Typography
                     variant="h4"
@@ -546,11 +536,9 @@ const JobDetailsPage = () => {
               >
                 
                 <Box sx={{ display: 'flex', marginBottom: '24px' }}>
-                  <Image
+                  <img
                     src="/images/logos/logo.svg"
                     alt="Company Logo"
-                    width={200}
-                    height={50}
                     style={{
                       maxWidth: "200px",
                       height: "auto",

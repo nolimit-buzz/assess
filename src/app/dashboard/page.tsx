@@ -413,7 +413,7 @@ const Dashboard = () => {
     };
 
     fetchStatistics();
-  }, [statistics]);
+  }, []);
 
 
 
