@@ -89,10 +89,10 @@ const CalendlySetupPage = () => {
             </Typography>
             <Box component="ol" sx={{ pl: 2, mb: 2 }}>
               <Typography component="li" variant="body1" sx={{ color: 'text.grey.100', mb: 1 }}>
-                Navigate to the "OAuth Applications" section
+                Navigate to the &quot;OAuth Applications&quot; section
               </Typography>
               <Typography component="li" variant="body1" sx={{ color: 'text.grey.100', mb: 1 }}>
-                Click "Create New Application"
+                Click &quot;Create New Application&quot;
               </Typography>
               <Typography component="li" variant="body1" sx={{ color: 'text.grey.100' }}>
                 Fill in the required application details
@@ -124,6 +124,13 @@ const CalendlySetupPage = () => {
             </Box>
           </Box>
         </Stack>
+
+        <p className="text-gray-600 mb-4">
+          Connect your Calendly account to allow candidates to schedule interviews directly through our platform. This will help you manage your interview schedule more efficiently and provide a better experience for your candidates.
+        </p>
+        <p className="text-gray-600 mb-4">
+          To get started, you&apos;ll need to authorize our application to access your Calendly account. This is a one-time setup process.
+        </p>
       </Paper>
     </Box>
   );

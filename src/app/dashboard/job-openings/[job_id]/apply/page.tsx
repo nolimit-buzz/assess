@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
 import Progress from "@/app/dashboard/layout/progress";
 import axios from "axios";
+import Image from 'next/image';
 
 interface FormField {
   key: string;
@@ -160,11 +161,7 @@ console.log(allFields, currentField)
       return (
       <div className="flex items-center justify-center w-full h-screen">
         <div className="space-y-8 w-full">
-          <img
-            src="/assets/thankyou.gif"
-            alt="Completed"
-            className="w-1/2 w-50 mx-auto rounded-lg"
-          />
+          <Image src="/path/to/image.jpg" alt="Application image" width={500} height={300} />
           <div className="text-center">
             <h1 className="text-3xl font-bold">
               Thank you for submitting the form
