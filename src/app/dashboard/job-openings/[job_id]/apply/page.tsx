@@ -100,18 +100,16 @@ export default function Typeform({
   useEffect(() => {
     const fetchFormData = async () => {
       try {
-        const token = localStorage.getItem('jwt');
         const response = await axios.get(
-          `https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${params.job_id}/application-form`,
+          `https://app.elevatehr.ai/wp-json/elevatehr/v1/active-jobs/${params.job_id}`,
           {
             headers: {
-              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
           }
         );
         console.log('Form data response:', response.data);
-        setFormData(response.data);
+        setFormData(response.data.jobs.application_form);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching form data:", error);
