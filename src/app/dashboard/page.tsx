@@ -469,7 +469,7 @@ const Dashboard = () => {
     };
 
     fetchStatistics();
-  }, [statistics]);
+  }, []);
 
   useEffect(() => {
     const fetchCalendlyEvents = async () => {
