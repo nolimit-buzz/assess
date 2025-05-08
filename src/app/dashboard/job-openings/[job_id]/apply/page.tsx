@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
 import Progress from "@/app/dashboard/layout/progress";
 import axios from "axios";
+import Image from 'next/image';
 
 interface FormField {
   key: string;
@@ -100,18 +101,16 @@ export default function Typeform({
   useEffect(() => {
     const fetchFormData = async () => {
       try {
-        const token = localStorage.getItem('jwt');
         const response = await axios.get(
-          `https://app.elevatehr.ai/wp-json/elevatehr/v1/jobs/${params.job_id}/application-form`,
+          `https://app.elevatehr.ai/wp-json/elevatehr/v1/active-jobs/${params.job_id}`,
           {
             headers: {
-              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
           }
         );
         console.log('Form data response:', response.data);
-        setFormData(response.data);
+        setFormData(response.data.jobs.application_form);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching form data:", error);
@@ -162,10 +161,13 @@ console.log(allFields, currentField)
       return (
       <div className="flex items-center justify-center w-full h-screen">
         <div className="space-y-8 w-full">
-          <img
+          <Image
             src="/assets/thankyou.gif"
             alt="Completed"
+            width={500}
+            height={300}
             className="w-1/2 w-50 mx-auto rounded-lg"
+            priority
           />
           <div className="text-center">
             <h1 className="text-3xl font-bold">

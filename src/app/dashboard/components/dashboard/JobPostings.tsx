@@ -13,10 +13,14 @@ import {
   styled,
   Button,
   Skeleton,
+  Menu,
+  MenuItem,
+  IconButton,
 } from "@mui/material";
 import DashboardCard from "@/app/dashboard/components/shared/DashboardCard";
 import zIndex from '@mui/material/styles/zIndex';
 import { useRouter } from 'next/navigation';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 interface JobPosting {
   id: string;
@@ -62,14 +66,16 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-const StyledTypography = styled(Typography)(({ theme }) => ({
+const StyledTypography = styled(Typography)({
   color: 'rgba(17, 17, 17, 0.92)',
-  fontSize: ' 18px',
+  fontSize: '19px',
   fontWeight: 600,
   lineHeight: '100%',
-  letterSpacing: '0.27px',
-  marginBottom: '16px',
-}));
+  letterSpacing: '0.12px',
+  '@media (min-width:600px)': {
+    fontSize: '18px'
+  }
+});
 
 const StyledSubtitleTypography = styled(Typography)(({ theme }) => ({
   fontSize: '13px',
@@ -158,6 +164,7 @@ const StyledTab = styled(Tab)(({ theme }) => ({
 const StyledTableHeaderRow = styled(TableRow)(({ theme }) => ({
   'th': {
     borderBottom: '1px solid rgba(17,17,17,0.082)',
+    
   }
 }));
 
@@ -175,10 +182,24 @@ const StyledTableBodyRow = styled(TableRow)(({ theme }) => ({
 }));
 
 const JobPostings = ({ statusFilter, setStatusFilter, jobPostings, customStyle = {}, isLoading = false }: JobPostingsProps) => {
-  const router = useRouter()
+  const router = useRouter();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   
   const handleStatusChange = (_event: React.SyntheticEvent, newValue: 'all' | 'active' | 'close') => {
     setStatusFilter(newValue);
+  };
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMenuItemClick = (value: 'all' | 'active' | 'close') => {
+    setStatusFilter(value);
+    handleMenuClose();
   };
 
   const renderTableContent = () => {
@@ -235,7 +256,7 @@ const JobPostings = ({ statusFilter, setStatusFilter, jobPostings, customStyle =
       >
         <StyledTableCell>
           <Stack>
-            <StyledTypography textTransform={'capitalize'}>
+            <StyledTypography textTransform={'capitalize'} mb={3}>
               {job.title}
             </StyledTypography>
             <Stack direction='row' gap={1}>
@@ -303,23 +324,127 @@ const JobPostings = ({ statusFilter, setStatusFilter, jobPostings, customStyle =
   return (
     <DashboardCard customStyle={{ padding: '0px', ...customStyle }}>
       <Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px' }}>
-          <Stack direction={'row'} alignItems={'center'} gap={1}>
-            <Typography variant="h2" fontWeight={'semibold'} fontSize={'24px'} color={'rgba(17,17,17,0.92)'} letterSpacing={'0.12px'}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'row',
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          gap: 2,
+          padding: '16px',
+          position: 'sticky',
+          top: 0,
+          backgroundColor: 'white',
+        }}>
+          <Stack direction={'row'} alignItems={'center'} gap={1} >
+            <Typography 
+              variant="h2" 
+              fontWeight={'semibold'} 
+              fontSize={{ xs: '18px', sm: '24px' }} 
+              color={'rgba(17,17,17,0.92)'} 
+              letterSpacing={'0.12px'}
+            >
               Job Listings
             </Typography>
-            <Typography variant="h2" fontWeight={'semibold'} fontSize={'24px'} color={'rgba(17,17,17,0.52)'} letterSpacing={'0.12px'}>
+            <Typography 
+              variant="h2" 
+              fontWeight={'semibold'} 
+              fontSize={{ xs: '18px', sm: '24px' }} 
+              color={'rgba(17,17,17,0.52)'} 
+              letterSpacing={'0.12px'}
+            >
               {`(${jobPostings.length})`}
             </Typography>
           </Stack>
-          <StyledTabs value={statusFilter} onChange={handleStatusChange} aria-label="job status tabs">
-            <StyledTab label="All" value="all" />
-            <StyledTab label="Active" value="active" />
-            <StyledTab label="Closed" value="close" />
-          </StyledTabs>
+          
+          <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+            <Stack 
+              direction="row" 
+              alignItems="center" 
+              gap={1}
+              sx={{
+                border: '1px solid rgba(17,17,17,0.12)',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                width: 'fit-content'
+              }}
+            >
+              <Typography color="rgba(17,17,17,0.62)" fontSize="14px">
+                {statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+              </Typography>
+              <IconButton 
+                onClick={handleMenuClick}
+                sx={{ 
+                  padding: '4px',
+                  '&:hover': {
+                    backgroundColor: 'transparent'
+                  }
+                }}
+              >
+                <FilterListIcon sx={{ fontSize: '20px' }} />
+              </IconButton>
+            </Stack>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+            >
+              <MenuItem 
+                onClick={() => handleMenuItemClick('all')}
+                selected={statusFilter === 'all'}
+              >
+                All
+              </MenuItem>
+              <MenuItem 
+                onClick={() => handleMenuItemClick('active')}
+                selected={statusFilter === 'active'}
+              >
+                Active
+              </MenuItem>
+              <MenuItem 
+                onClick={() => handleMenuItemClick('close')}
+                selected={statusFilter === 'close'}
+              >
+                Closed
+              </MenuItem>
+            </Menu>
+          </Box>
+
+          <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+            <StyledTabs value={statusFilter} onChange={handleStatusChange} aria-label="job status tabs">
+              <StyledTab label="All" value="all" />
+              <StyledTab label="Active" value="active" />
+              <StyledTab label="Closed" value="close" />
+            </StyledTabs>
+          </Box>
         </Box>
-        <Box sx={{ overflow: "auto" }}>
-          <Box sx={{ width: "100%", display: "table", tableLayout: "fixed" }}>
+        <Box sx={{ 
+          overflow: "auto", 
+          height: 'calc(600px - 100px)',
+          // height: '600px',
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#032B4420 transparent',
+          '&::-webkit-scrollbar': {
+            height: '4px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#032B44',
+            width: '4px', 
+            borderRadius: '4px',
+            '&:hover': {
+              background: 'rgba(68, 68, 226, 0.3)',
+            },
+          },
+        }}>
+          <Box sx={{ 
+            width: "100%", 
+            display: "table", 
+            tableLayout: "fixed", 
+            height: 'max-content',
+            // overflowX: 'scroll'
+          }}>
             <Table>
               <TableHead>
                 <StyledTableHeaderRow>

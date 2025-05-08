@@ -43,6 +43,12 @@ import { useTheme } from '@mui/material/styles';
 import CreatableSelect from 'react-select/creatable';
 import { ActionMeta, MultiValue, GroupBase } from 'react-select';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import CloseIcon from '@mui/icons-material/Close';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import { AlertColor } from '@mui/material/Alert';
 
 const Banner = styled(Box)(({ theme }) => ({
   width: '100%',
@@ -78,21 +84,32 @@ const FormContainer = styled(Box)(({ theme }) => ({
 
 const StyledStepper = styled(Stepper)(({ theme }) => ({
   padding: '28px 24px',
+  [theme.breakpoints.down('md')]: {
+    padding: '12px'
+  },
   '& .MuiStepConnector-line': {
-    border: '0.5px dashed rgba(17, 17, 17, 0.68)'
+    border: '0.5px dashed rgba(17, 17, 17, 0.68)',
+    
   },
   '& .Mui-completed svg': {
     color: 'rgba(29, 175, 97, 1)'
+  },
+  '& .MuiStep-root': {
+    paddingX: { xs: '4px', md: '8px' },
+    display: { xs: 'none', md: 'flex' },
+    '&.Mui-active': {
+      display: 'flex'
+    }
   }
 }));
 
 const StyledStepLabel = styled(StepLabel)(({ theme }) => ({
   '& .MuiStepLabel-label': {
     color: 'rgba(17, 17, 17, 0.68)',
-    fontSize: '16px',
+    fontSize: { xs: '14px', md: '16px' },
     fontWeight: '400',
     lineHeight: '100%',
-    letterSpacing: '0.16px',
+    letterSpacing: { xs: '0', md: '0.16px' },
   },
   '& .Mui-active': {
     fontWeight: '400',
@@ -327,24 +344,24 @@ const TextEditor: React.FC<TextEditorProps> = ({ label, description, value, onCh
   const theme = useTheme();
   return (
     <>
-      <Stack direction="row" spacing={3} alignItems="flex-start" width={'100%'} padding="28px 24px">
-        <Stack spacing={1} minWidth={'280px'}>
-          <Stack direction="row" alignItems="center" spacing={1}>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'flex-start', sm: 'flex-start' }} width={'100%'} padding="28px 24px">
+        <Stack spacing={1} minWidth={{ xs: '100%', sm: '280px' }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={1}>
             <Typography variant="subtitle1" sx={{
               color: theme.palette.grey[100],
-              fontSize: '20px',
+              fontSize: { xs: '18px', sm: '20px' },
               fontStyle: 'normal',
               fontWeight: 600,
               lineHeight: '100%',
               letterSpacing: '0.1px',
             }}>{label}</Typography>
-            <IconButton size="small" onClick={onRegenerate}>
+            <IconButton size="small" onClick={onRegenerate} sx={{ mt: { xs: 1, sm: 0 } }}>
               <RefreshIcon />
             </IconButton>
           </Stack>
           <Typography sx={{
             color: theme.palette.grey[100],
-            fontSize: '16px',
+            fontSize: { xs: '14px', sm: '16px' },
             fontStyle: 'normal',
             fontWeight: 400,
             lineHeight: '100%',
@@ -380,11 +397,11 @@ const Field: React.FC<FieldProps> = ({
   const theme = useTheme();
   return (
     <>
-      <Stack direction="row" spacing={3} alignItems="flex-start" padding="28px 24px">
-        <Stack spacing={1} minWidth={'280px'}>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'flex-start', sm: 'flex-start' }} padding="28px 24px">
+        <Stack spacing={1} minWidth={{ xs: '100%', sm: '280px' }}>
           <Typography variant="subtitle1" sx={{
             color: theme.palette.grey[100],
-            fontSize: '20px',
+            fontSize: { xs: '18px', sm: '20px' },
             fontStyle: 'normal',
             fontWeight: 600,
             lineHeight: '100%',
@@ -392,7 +409,7 @@ const Field: React.FC<FieldProps> = ({
           }}>{label}</Typography>
           <Typography sx={{
             color: theme.palette.grey[100],
-            fontSize: '16px',
+            fontSize: { xs: '14px', sm: '16px' },
             fontStyle: 'normal',
             fontWeight: 400,
             lineHeight: '100%',
@@ -427,24 +444,26 @@ const FormBuilderField: React.FC<FormBuilderFieldProps> = ({
   isRequired
 }) => {
   const theme = useTheme();
-  const isDefaultField = defaultCustomFields.some(df => df.key === field.key);
 
   return (
     <Stack alignItems="flex-start" width={'100%'} sx={{ padding: '20px 22px', border: '1px solid rgba(17, 17, 17, 0.14)', borderRadius: '8px' }}>
-      <Stack direction='row' spacing={1} width={'100%'}>
-        <Stack direction="row" alignItems="center" justifyContent={'space-between'} width={'100%'}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} width={'100%'}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" justifyContent={'space-between'} width={'100%'}>
           <TextField
             placeholder="Type Question"
             value={field.label}
             onChange={(e) => handleChange(index, 'label', e.target.value)}
             variant="outlined"
-            disabled={isRequired || isDefaultField}
+            
+            // disabled={isRequired || isDefaultField}
             sx={{
               width: '100%',
               '& .MuiInputBase-root': {
                 '& input': {
+                  pointerEvents: isRequired ? 'none' : 'auto',
+                  paddingX:0,
                   fontSize: '16px !important',
-                  color: theme.palette.grey[100],
+                  color: 'black',
                   fontWeight: 500,
                   lineHeight: '100%',
                   letterSpacing: '0.16px',
@@ -459,13 +478,13 @@ const FormBuilderField: React.FC<FormBuilderFieldProps> = ({
               }
             }}
           />
-          {!isRequired && !isDefaultField && (
-            <Stack direction={'row'} gap={2} alignItems={'center'}>
+          {!isRequired  && (
+            <Stack direction={'row'} gap={2} alignItems={'center'} justifyContent={{ xs: 'space-between', sm: 'flex-start' }} width={{ xs: '100%', sm: 'max-content' }} mb={{ xs: 2, sm: 0 }}>
               <FormControl variant="outlined" style={{ minWidth: 150 }}>
                 <Select
                   value={field.type}
                   onChange={(e) => handleTypeChange(index, e.target.value)}
-                  disabled={isDefaultField}
+                  disabled={isRequired}
                   sx={{
                     '& .MuiSelect-select': {
                       padding: '5px 8px',
@@ -490,7 +509,7 @@ const FormBuilderField: React.FC<FormBuilderFieldProps> = ({
                   <MenuItem value="file">Attachment</MenuItem>
                 </Select>
               </FormControl>
-              <IconButton onClick={() => handleDelete(index)}>
+              <IconButton sx={{padding: 0}} onClick={() => handleDelete(index)}>
                 <DeleteIcon />
               </IconButton>
             </Stack>
@@ -498,14 +517,14 @@ const FormBuilderField: React.FC<FormBuilderFieldProps> = ({
         </Stack>
       </Stack>
 
-      {field.type === 'text' && (
+      {(field.type === 'text' || field.type === 'number') && (
         <TextField
           fullWidth
           value={field.value || ''}
           onChange={(e) => handleChange(index, 'value', e.target.value)}
           variant="outlined"
           InputProps={{
-            readOnly: isRequired || isDefaultField,
+            readOnly: isRequired,
             autoFocus: true,
           }}
           placeholder="Response field"
@@ -536,15 +555,18 @@ const FormBuilderField: React.FC<FormBuilderFieldProps> = ({
 
       {field.type === 'select' && (
         <Stack width={'100%'} gap={1}>
-          {(field.options || []).map((option, optionIndex) => (
+          {Object.entries(field.options || {}).map(([value, label], optionIndex) => (
             <Stack key={optionIndex} direction={'row'} gap={1} alignItems={'center'}>
               <TextField
                 fullWidth
-                value={option || ''}
-                onChange={(e) => handleChange(index, 'options', e.target.value, optionIndex)}
+                value={label || ''}
+                onChange={(e) => {
+                  const newOptions = { ...field.options, [value]: e.target.value };
+                  handleChange(index, 'options', JSON.stringify(newOptions));
+                }}
                 variant="outlined"
                 placeholder="Option"
-                disabled={isDefaultField}
+                disabled={isRequired}
                 sx={{
                   flex: 1,
                   '& .MuiInputBase-root': {
@@ -568,14 +590,14 @@ const FormBuilderField: React.FC<FormBuilderFieldProps> = ({
                   }
                 }}
               />
-              {!isRequired && !isDefaultField && (
+              {!isRequired  && (
                 <IconButton onClick={() => handleDelete(index, optionIndex)}>
                   <DeleteIcon />
                 </IconButton>
               )}
             </Stack>
           ))}
-          {!isRequired && !isDefaultField && (
+          {!isRequired && (
             <StyledOutlineButton
               variant="outlined"
               color="primary"
@@ -595,10 +617,16 @@ const FormBuilderField: React.FC<FormBuilderFieldProps> = ({
             fullWidth
             component="span"
             startIcon={<AttachFileIcon />}
-            disabled={isDefaultField || isRequired}
+            // disabled={isDefaultField || isRequired}
             sx={{
+              fontSize: '16px',
+              // fontWeight: 500,
+              borderColor: 'rgba(17, 17, 17, 0.14)',
+              pointerEvents: isRequired ? 'none' : 'auto',
+              lineHeight: '100%',
+              letterSpacing: '0.14px',
               backgroundColor: '#F8F9FB',
-              color: 'rgba(17, 17, 17, 0.84)',
+              color: 'rgba(17, 17, 1,0.4)',
               padding: '16px',
               borderRadius: '8px',
               justifyContent: 'flex-start',
@@ -650,7 +678,7 @@ const AssessmentStep: React.FC<AssessmentStepProps> = ({
       </Box>
 
       {/* Assessment Selection */}
-      <Stack direction="row" spacing={3} alignItems="flex-start" width={'100%'}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems="flex-start" width={'100%'}>
         <Stack spacing={1} minWidth={'280px'}>
           <Typography 
             variant="subtitle1" 
@@ -730,28 +758,28 @@ const AssessmentStep: React.FC<AssessmentStepProps> = ({
   );
 };
 
-const defaultCustomFields: CustomField[] = [
-  {
-    key: 'experience',
-    label: 'Years of Experience',
-    type: 'text',
-    required: true
-  },
-  {
-    key: 'skills',
-    label: 'Relevant Skills',
-    type: 'text',
-    required: true,
-    description: 'List your relevant skills for this position'
-  },
-  {
-    key: 'availability',
-    label: 'When can you start?',
-    type: 'select',
-    required: true,
-    options: ['Immediately', 'In 2 weeks', 'In a month', 'In 2 months']
-  }
-];
+// const defaultCustomFields: CustomField[] = [
+//   {
+//     key: 'experience',
+//     label: 'Years of Experience',
+//     type: 'text',
+//     required: true
+//   },
+//   {
+//     key: 'skills',
+//     label: 'Relevant Skills',
+//     type: 'text',
+//     required: true,
+//     description: 'List your relevant skills for this position'
+//   },
+//   {
+//     key: 'availability',
+//     label: 'When can you start?',
+//     type: 'select',
+//     required: true,
+//     options: ['Immediately', 'In 2 weeks', 'In a month', 'In 2 months']
+//   }
+// ];
 
 const AboutTheJob = () => {
   const params = useParams();
@@ -782,6 +810,11 @@ const AboutTheJob = () => {
   const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [jobUrl, setJobUrl] = useState("");
+  const [notification, setNotification] = useState<{ open: boolean; message: string; severity: AlertColor }>({ 
+    open: false, 
+    message: '', 
+    severity: 'success' 
+  });
   const [technicalSkills, setTechnicalSkills] = useState<string[]>([]);
   const [softSkills, setSoftSkills] = useState<string[]>([]);
   const [customSkills, setCustomSkills] = useState<string[]>([]);
@@ -835,7 +868,6 @@ const AboutTheJob = () => {
             skills: allSkills.slice(0, 6)
           });
           // Only set default custom fields if no custom fields exist in job data
-          setCustomFields(jobData.application_form?.custom_fields?.length ? jobData.application_form.custom_fields : defaultCustomFields);
           setFormFields(jobData.application_form?.required_fields || []);
           setLoading(false);
           return;
@@ -851,7 +883,6 @@ const AboutTheJob = () => {
           skills: jobData.skills.split(',')
         });
         // Only set default custom fields if no custom fields exist in job data
-        setCustomFields(jobData.application_form?.custom_fields?.length ? jobData.application_form.custom_fields : defaultCustomFields);
         setFormFields(jobData.application_form?.required_fields || []);
 
         setLoading(false);
@@ -1088,14 +1119,22 @@ const AboutTheJob = () => {
     }
   };
 
-  // Copy to clipboard function
+  const handleCloseNotification = () => {
+    setNotification(prev => ({ ...prev, open: false }));
+    window.location.href = `/dashboard/job-posting/${jobId}/submissions`;
+  };
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(jobUrl).then(() => {
-      alert("URL copied to clipboard!");
+      setNotification({
+        open: true,
+        message: 'URL copied to clipboard!',
+        severity: 'success'
+      });
+      setShowDialog(false);
     });
   };
 
-  // Redirect function
   const handleCloseDialog = () => {
     setShowDialog(false);
     window.location.href = `${process.env.NEXT_PUBLIC_HOST}/dashboard`;
@@ -1165,11 +1204,11 @@ const AboutTheJob = () => {
               onChange={(value) => handleChange('responsibilities', value)}
               onRegenerate={handleRegenerate('jobResponsibilities')}
             />
-            <Stack spacing={1} marginBottom="10px" direction="row" padding="28px 24px">
-              <Stack spacing={1} minWidth={'280px'}>
+            <Stack spacing={1} marginBottom="10px" direction={{ xs: 'column', md: 'row' }} padding="28px 24px">
+              <Stack spacing={1} minWidth={{ xs: '100%', sm: '280px' }}>
                 <Typography variant="subtitle1" sx={{
                   color: 'rgba(17, 17, 17, 0.92)',
-                  fontSize: '20px',
+                  fontSize: { xs: '18px', sm: '20px' },
                   fontStyle: 'normal',
                   fontWeight: 600,
                   lineHeight: '100%',
@@ -1177,7 +1216,7 @@ const AboutTheJob = () => {
                 }}>Expectation</Typography>
                 <Typography sx={{
                   color: 'rgba(17, 17, 17, 0.68)',
-                  fontSize: '16px',
+                  fontSize: { xs: '14px', sm: '16px' },
                   fontStyle: 'normal',
                   fontWeight: 400,
                   lineHeight: '100%',
@@ -1241,11 +1280,11 @@ const AboutTheJob = () => {
               }}
             />
             <Divider />
-            <Stack direction="row" spacing={3} alignItems="flex-start" padding="28px 24px">
-              <Stack spacing={1} minWidth={'280px'}>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'flex-start', sm: 'flex-start' }} padding="28px 24px">
+              <Stack spacing={1} minWidth={{ xs: '100%', sm: '280px' }}>
                 <Typography variant="subtitle1" sx={{
                   color: 'rgba(17, 17, 17, 0.92)',
-                  fontSize: '20px',
+                  fontSize: { xs: '18px', sm: '20px' },
                   fontStyle: 'normal',
                   fontWeight: 600,
                   lineHeight: '100%',
@@ -1253,7 +1292,7 @@ const AboutTheJob = () => {
                 }}>Skills Required</Typography>
                 <Typography sx={{
                   color: 'rgba(17, 17, 17, 0.68)',
-                  fontSize: '16px',
+                  fontSize: { xs: '14px', sm: '16px' },
                   fontStyle: 'normal',
                   fontWeight: 400,
                   lineHeight: '100%',
@@ -1391,7 +1430,7 @@ const AboutTheJob = () => {
       <FormContainer>
         <StyledStepper activeStep={currentStep - 1}>
           {steps.map((label, index) => (
-            <Step key={label}>
+            <Step key={label} sx={{'& .MuiStep-root': {paddingX: { xs: '4px !important', md: '8px' }}}}>
               <StyledStepLabel>{label}</StyledStepLabel>
             </Step>
           ))}
@@ -1399,7 +1438,7 @@ const AboutTheJob = () => {
         <Divider />
 
         {renderStepContent()}
-        <Stack direction="row" gap={3} alignItems="flex-start" marginBottom="20px" width={'100%'} justifyContent={'flex-end'} padding={'28px 43px'}>
+        <Stack direction="row" gap={3} alignItems="flex-start" marginBottom="20px" width={'100%'} justifyContent={'flex-end'} padding={'28px'}>
           {currentStep === 3 ? (
             <Stack direction={'row'} gap={3}>
               <StyledOutlineButton
@@ -1442,10 +1481,52 @@ const AboutTheJob = () => {
             </>
           )}
         </Stack>
-        <Dialog open={showDialog} onClose={handleCloseDialog}>
-          <DialogTitle>Job Post Updated Successfully!</DialogTitle>
-          <DialogContent>
-            <Typography variant="body1">Your job post has been successfully updated. You can share the job link below:</Typography>
+        <Dialog 
+          open={showDialog} 
+          onClose={handleCloseDialog} 
+          maxWidth="sm" 
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: '12px',
+              maxWidth: '520px'
+            }
+          }}
+        >
+          <Box sx={{ position: 'relative' }}>
+            <IconButton
+              onClick={handleCloseDialog}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+                color: 'rgba(17, 17, 17, 0.6)'
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+            <DialogTitle sx={{ 
+              display: 'flex', 
+              flexDirection: 'column',
+              alignItems: 'center', 
+              gap: 2,
+              color: 'rgba(17, 17, 17, 0.92)',
+              fontSize: '20px',
+              fontWeight: 600,
+              py: 3,
+              px: 4
+            }}>
+              <TaskAltIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+              Job Post Updated Successfully!
+            </DialogTitle>
+          </Box>
+          <DialogContent sx={{ pt: 1, pb: 3, px: 4 }}>
+            <Typography variant="body1" sx={{ 
+              color: 'rgba(17, 17, 17, 0.68)',
+              mb: 2
+            }}>
+              Your job post has been successfully updated. You can share the job link below:
+            </Typography>
             <TextField
               fullWidth
               margin="dense"
@@ -1458,14 +1539,65 @@ const AboutTheJob = () => {
                   </IconButton>
                 )
               }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderWidth: '1px'
+                  }
+                }
+              }}
             />
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDialog} variant="contained" color="primary">
-              Close
-            </Button>
-          </DialogActions>
         </Dialog>
+        <Snackbar
+          open={notification.open}
+          autoHideDuration={3000}
+          onClose={handleCloseNotification}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          sx={{ 
+            zIndex: 9999,
+            '&.MuiSnackbar-root': {
+              [theme.breakpoints.down('sm')]: {
+                bottom: '80px'
+              }
+            }
+          }}
+        >
+          <Alert 
+            onClose={handleCloseNotification} 
+            severity={notification.severity}
+            sx={{
+              minWidth: '300px',
+              backgroundColor: 'primary.main',
+              color: 'secondary.light',
+              borderRadius: '100px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              '& .MuiAlert-icon': {
+                color: '#fff',
+                marginRight: '8px',
+                padding: 0,
+              },
+              '& .MuiAlert-message': {
+                padding: '6px 0',
+                fontSize: '15px',
+                textAlign: 'center',
+                flex: 'unset',
+              },
+              '& .MuiAlert-action': {
+                padding: '0 8px 0 0',
+                marginRight: 0,
+                '& .MuiButtonBase-root': {
+                  color: '#fff',
+                  padding: 1,
+                },
+              },
+            }}
+          >
+            {notification.message}
+          </Alert>
+        </Snackbar>
       </FormContainer>
     </PageContainer>
   );
