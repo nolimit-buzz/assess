@@ -6,6 +6,3 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-[context.production.environment]
-  NEXT_PUBLIC_ENV = "production"
