@@ -1,0 +1,12 @@
+[build]
+  command = "npm run prebuild && npm run build"
+  publish = "out"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[context.production.environment]
+  NEXT_PUBLIC_ENV = "production"
