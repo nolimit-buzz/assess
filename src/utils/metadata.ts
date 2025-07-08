@@ -1,5 +1,6 @@
 export default {
   host:"Assess.ng",
+  website:"https://assess.ng",
   logo:"/images/logos/logo.svg",
   favicon:"/images/logos/favicon.svg",
   title:"Assess.ng",
